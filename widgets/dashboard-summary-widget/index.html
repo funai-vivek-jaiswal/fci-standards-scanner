@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Governance Summary</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- Loading state -->
+    <div id="state-loading" class="state-loading">
+        <div class="skeleton skeleton--title"></div>
+        <div class="skeleton skeleton--bar"></div>
+        <div class="skeleton-grid">
+            <div class="skeleton skeleton--card"></div>
+            <div class="skeleton skeleton--card"></div>
+            <div class="skeleton skeleton--card"></div>
+            <div class="skeleton skeleton--card"></div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <main id="state-main" class="main" hidden>
+
+        <header class="summary-header">
+            <div class="header-left">
+                <h1 class="summary-title">Compliance Overview</h1>
+                <p class="summary-date" id="last-scan-date">Last scan: —</p>
+            </div>
+            <div class="pass-rate-badge" id="pass-rate-badge">
+                <span id="pass-rate-value">—</span>
+                <span class="pass-rate-label">Pass Rate</span>
+            </div>
+        </header>
+
+        <!-- Overall progress bar -->
+        <div class="overall-bar-wrap" role="progressbar" aria-label="Overall pass rate">
+            <div class="overall-bar" id="overall-bar"></div>
+        </div>
+
+        <!-- Summary stat cards -->
+        <div class="stat-grid">
+            <article class="stat-card stat-card--pass">
+                <span class="stat-icon">✅</span>
+                <span class="stat-value" id="stat-pass">—</span>
+                <span class="stat-label">Passed</span>
+            </article>
+            <article class="stat-card stat-card--fail">
+                <span class="stat-icon">❌</span>
+                <span class="stat-value" id="stat-fail">—</span>
+                <span class="stat-label">Failed</span>
+            </article>
+            <article class="stat-card stat-card--warn">
+                <span class="stat-icon">⚠️</span>
+                <span class="stat-value" id="stat-warn">—</span>
+                <span class="stat-label">Warnings</span>
+            </article>
+            <article class="stat-card stat-card--crit">
+                <span class="stat-icon">🔴</span>
+                <span class="stat-value" id="stat-crit">—</span>
+                <span class="stat-label">Critical</span>
+            </article>
+        </div>
+
+        <!-- Per-module breakdown -->
+        <section class="module-table-section">
+            <h2 class="section-title">By Module</h2>
+            <table class="module-table">
+                <thead>
+                    <tr>
+                        <th>Module</th>
+                        <th>Pass</th>
+                        <th>Fail</th>
+                        <th>Crit</th>
+                        <th>Rate</th>
+                    </tr>
+                </thead>
+                <tbody id="module-table-body">
+                    <!-- Populated by app.js -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Recent critical findings -->
+        <section class="findings-section" id="findings-section" hidden>
+            <h2 class="section-title">🔴 Open Critical Findings</h2>
+            <ul class="findings-list" id="findings-list"></ul>
+            <a class="view-all-link" href="#" onclick="openFindingsPage()">View all findings →</a>
+        </section>
+
+    </main>
+
+    <!-- Error state -->
+    <div id="state-error" class="state-error" hidden>
+        <p>⚠️ Could not load scan data. Run a scan first.</p>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+/**
+ * Function:  CRT_FetchSigmaData_fn
+ * Module:    Creator - FCI_GovernanceScanner
+ * Purpose:   Fetch metadata from Zoho Sigma for compliance checking.
+ *            Retrieves extensions, components, functions, and connections.
+ * Params:    none
+ * Returns:   map containing structured Sigma metadata lists
+ * Author:    India Tech Lead
+ * Modified:  2026-05-26 — initial version
+ */
+map function CRT_FetchSigmaData_fn()
+{
+    result = map();
+    baseUrl  = "https://sigma.zoho.in/api/v1";
+    connName = "conn_zoho_sigma";
+
+    // ── Extensions ───────────────────────────────────────────────────
+    extensionList = list();
+    try
+    {
+        resp = invokeurl
+        [
+            url: baseUrl + "/extensions"
+            type: GET
+            connection: connName
+        ];
+        extensions = resp.get("extensions");
+        if (extensions != null)
+        {
+            for each ext in extensions
+            {
+                extensionList.add({
+                    "id": ext.get("id"),
+                    "name": ext.get("unique_name"),
+                    "display_name": ext.get("display_name"),
+                    "version": ext.get("version")
+                });
+            }
+        }
+    }
+    catch (e)
+    {
+        info "[CRT_FetchSigmaData_fn] Failed extensions: " + e.getMessage();
+    }
+    result.put("sigma_extensions", extensionList);
+
+    // ── Components + Functions + Connections per extension ───────────
+    allComponents  = list();
+    allFunctions   = list();
+    allConnections = list();
+
+    for each ext in extensionList
+    {
+        extId   = ext.get("id");
+        extName = ext.get("name");
+
+        // Components
+        try
+        {
+            resp = invokeurl
+            [
+                url: baseUrl + "/extensions/" + extId + "/components"
+                type: GET
+                connection: connName
+            ];
+            comps = resp.get("components");
+            if (comps != null)
+            {
+                for each comp in comps
+                {
+                    allComponents.add({
+                        "id": comp.get("id"),
+                        "name": comp.get("name"),
+                        "extension": extName
+                    });
+                }
+            }
+        }
+        catch (e)
+        {
+            info "[CRT_FetchSigmaData_fn] Components error for " + extName + ": " + e.getMessage();
+        }
+
+        // Functions
+        try
+        {
+            resp = invokeurl
+            [
+                url: baseUrl + "/extensions/" + extId + "/functions"
+                type: GET
+                connection: connName
+            ];
+            fns = resp.get("functions");
+            if (fns != null)
+            {
+                for each fn in fns
+                {
+                    allFunctions.add({
+                        "id": fn.get("id"),
+                        "name": fn.get("name"),
+                        "extension": extName
+                    });
+                }
+            }
+        }
+        catch (e)
+        {
+            info "[CRT_FetchSigmaData_fn] Functions error for " + extName + ": " + e.getMessage();
+        }
+
+        // Connections
+        try
+        {
+            resp = invokeurl
+            [
+                url: baseUrl + "/extensions/" + extId + "/connections"
+                type: GET
+                connection: connName
+            ];
+            conns = resp.get("connections");
+            if (conns != null)
+            {
+                for each conn in conns
+                {
+                    allConnections.add({
+                        "id": conn.get("id"),
+                        "name": conn.get("name"),
+                        "extension": extName
+                    });
+                }
+            }
+        }
+        catch (e)
+        {
+            info "[CRT_FetchSigmaData_fn] Connections error for " + extName + ": " + e.getMessage();
+        }
+    }
+
+    result.put("sigma_components",  allComponents);
+    result.put("sigma_functions",   allFunctions);
+    result.put("sigma_connections", allConnections);
+
+    return result;
+}

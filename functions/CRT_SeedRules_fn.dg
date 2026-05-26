@@ -1,0 +1,118 @@
+/**
+ * Function:  CRT_SeedRules_fn
+ * Module:    Creator - FCI_GovernanceScanner
+ * Purpose:   Bulk-insert all governance rules into Rule_Repository.
+ *            Run ONCE during initial app setup. Safe to re-run —
+ *            checks for existing short_code before inserting.
+ * Params:    none
+ * Returns:   map { inserted, skipped, errors }
+ * Author:    India Tech Lead
+ * Modified:  2026-05-26 — initial version
+ *
+ * USAGE:  Run this function manually from Creator → Functions → Run.
+ *         Alternatively, import seed-data/rules_seed.csv via Creator Import.
+ */
+map function CRT_SeedRules_fn()
+{
+    inserted = 0;
+    skipped  = 0;
+    errors   = 0;
+
+    // ── Define all seed rules ────────────────────────────────────────
+    // Format: {short_code, name, category, source_doc, modules, severity, check_type, pattern, expected, remediation}
+
+    rules = list();
+
+    // ── NAMING — CRM ─────────────────────────────────────────────────
+    rules.add({"short_code":"NMC-CRM-001","name":"CRM function name must have CRM_ prefix and _fn suffix","category":"Naming","source_doc":"04_CRM","modules":"CRM","severity":"HIGH","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^CRM_[a-zA-Z][a-zA-Z0-9]+_(fn|wf|bp|rpt|dsh|con|var)$\",\"data_key\":\"crm_functions\"}","expected":"CRM_verbNoun_fn","remediation":"Rename the function in CRM Settings → Functions. Pattern: CRM_VerbNoun_fn"});
+    rules.add({"short_code":"NMC-CRM-002","name":"CRM custom field API name must be UPPER_SNAKE_CASE","category":"Naming","source_doc":"04_CRM","modules":"CRM","severity":"MEDIUM","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^[A-Z][A-Z0-9_]+[A-Z0-9]$\",\"data_key\":\"crm_fields\"}","expected":"FIELD_API_NAME","remediation":"Rename field API name in CRM Settings → Modules → Fields. Use UPPER_SNAKE_CASE."});
+    rules.add({"short_code":"NMC-CRM-003","name":"CRM Boolean field must start with Is_ or Has_","category":"Naming","source_doc":"04_CRM","modules":"CRM","severity":"MEDIUM","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^(Is_|Has_|Can_)[A-Z]\",\"data_key\":\"crm_fields\",\"filter_type\":\"boolean\"}","expected":"Is_FieldName or Has_FieldName","remediation":"Rename boolean field to start with Is_, Has_, or Can_."});
+    rules.add({"short_code":"NMC-CRM-004","name":"CRM Date field API name must end with _Date","category":"Naming","source_doc":"04_CRM","modules":"CRM","severity":"LOW","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\".*_Date$\",\"data_key\":\"crm_fields\",\"filter_type\":\"date\"}","expected":"Field_Name_Date","remediation":"Rename date field to end with _Date."});
+    rules.add({"short_code":"NMC-CRM-005","name":"CRM Blueprint name must end with _BP","category":"Naming","source_doc":"04_CRM","modules":"CRM","severity":"MEDIUM","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\".*_BP$\",\"data_key\":\"crm_blueprints\"}","expected":"Module_Process_BP","remediation":"Rename blueprint in CRM Settings → Blueprints."});
+    rules.add({"short_code":"NMC-CRM-006","name":"CRM Workflow: [Module]_[Trigger]_[Action] format","category":"Naming","source_doc":"04_CRM","modules":"CRM","severity":"LOW","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^[A-Z][a-zA-Z]+_[A-Z][a-zA-Z]+_[A-Z][a-zA-Z]+$\",\"data_key\":\"crm_workflows\"}","expected":"Lead_OnCreate_AssignOwner","remediation":"Rename workflow in CRM Settings → Automation."});
+
+    // ── NAMING — Creator ─────────────────────────────────────────────
+    rules.add({"short_code":"NMC-CRT-001","name":"Creator function must have CRT_ prefix and _fn suffix","category":"Naming","source_doc":"02_Creator","modules":"Creator","severity":"HIGH","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^CRT_[a-zA-Z][a-zA-Z0-9]+_(fn|sch|wf)$\",\"data_key\":\"creator_functions\"}","expected":"CRT_VerbNoun_fn","remediation":"Rename function in Creator → Functions."});
+    rules.add({"short_code":"NMC-CRT-002","name":"Creator form names must be PascalCase singular","category":"Naming","source_doc":"02_Creator","modules":"Creator","severity":"MEDIUM","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^[A-Z][a-zA-Z0-9]*$\",\"data_key\":\"creator_forms\"}","expected":"EntityName (e.g. ScanFinding)","remediation":"Rename form in Creator → Form Properties."});
+    rules.add({"short_code":"NMC-CRT-003","name":"Creator report name: Entity_ViewType_Filter","category":"Naming","source_doc":"02_Creator","modules":"Creator","severity":"LOW","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^[A-Z][a-zA-Z]+_[A-Z][a-zA-Z]+(_[A-Z][a-zA-Z]+)?$\",\"data_key\":\"creator_reports\"}","expected":"Projects_List_Active","remediation":"Rename report in Creator → Reports."});
+
+    // ── NAMING — People ──────────────────────────────────────────────
+    rules.add({"short_code":"NMC-PEO-001","name":"People custom function must have PEO_ prefix","category":"Naming","source_doc":"05_People","modules":"People","severity":"HIGH","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^PEO_[a-zA-Z][a-zA-Z0-9]+_fn$\",\"data_key\":\"people_functions\"}","expected":"PEO_VerbNoun_fn","remediation":"Rename function in People → Custom Functions."});
+    rules.add({"short_code":"NMC-PEO-002","name":"People custom fields must have PEO_ prefix","category":"Naming","source_doc":"05_People","modules":"People","severity":"MEDIUM","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^PEO_[A-Z][A-Z0-9_]+$\",\"data_key\":\"people_fields\"}","expected":"PEO_Field_Name","remediation":"Rename field in People → Custom Fields. Prefix with PEO_."});
+    rules.add({"short_code":"NMC-PEO-003","name":"People alert name: [Event]_[Audience]_Alert","category":"Naming","source_doc":"05_People","modules":"People","severity":"LOW","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^[A-Z][a-zA-Z]+_[A-Z][a-zA-Z]+_Alert$\",\"data_key\":\"people_alerts\"}","expected":"LeaveApproved_Employee_Alert","remediation":"Rename alert in People → Notifications."});
+
+    // ── NAMING — Recruit ─────────────────────────────────────────────
+    rules.add({"short_code":"NMC-RCT-001","name":"Recruit function must have RCT_ prefix and _fn suffix","category":"Naming","source_doc":"06_Recruit","modules":"Recruit","severity":"HIGH","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^RCT_[a-zA-Z][a-zA-Z0-9]+_fn$\",\"data_key\":\"recruit_functions\"}","expected":"RCT_VerbNoun_fn","remediation":"Rename function in Recruit → Custom Functions."});
+    rules.add({"short_code":"NMC-RCT-002","name":"Recruit workflow name: [Module]_[Trigger]_[Action]","category":"Naming","source_doc":"06_Recruit","modules":"Recruit","severity":"LOW","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^[A-Z][a-zA-Z]+_[A-Z][a-zA-Z]+_[A-Z][a-zA-Z]+$\",\"data_key\":\"recruit_workflows\"}","expected":"Candidate_OnCreate_AssignRecruiter","remediation":"Rename workflow in Recruit → Automation."});
+
+    // ── NAMING — Forms ───────────────────────────────────────────────
+    rules.add({"short_code":"NMC-FRM-001","name":"Zoho Form name: [Purpose]_[Audience]_v[N]","category":"Naming","source_doc":"07_Forms","modules":"Forms","severity":"MEDIUM","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^[A-Z][a-zA-Z]+_[A-Z][a-zA-Z]+_v[0-9]+$\",\"data_key\":\"forms_list\"}","expected":"LeadCapture_Website_v1","remediation":"Rename form in Zoho Forms. Pattern: Purpose_Audience_vN."});
+    rules.add({"short_code":"NMC-FRM-002","name":"Forms integration name must have FRM_ prefix","category":"Naming","source_doc":"07_Forms","modules":"Forms","severity":"MEDIUM","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^FRM_[A-Z][a-zA-Z]+_To_[A-Z][a-zA-Z]+$\",\"data_key\":\"forms_integrations\"}","expected":"FRM_LeadCapture_To_CRM","remediation":"Rename integration in Zoho Forms → Integrations."});
+
+    // ── NAMING — Analytics ───────────────────────────────────────────
+    rules.add({"short_code":"NMC-ANL-001","name":"Analytics workspace: [Domain]_[Team]_Workspace","category":"Naming","source_doc":"08_Analytics","modules":"Analytics","severity":"MEDIUM","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^[A-Z][a-zA-Z]+_[A-Z][a-zA-Z]+_Workspace$\",\"data_key\":\"analytics_workspaces\"}","expected":"Sales_FCI_Workspace","remediation":"Rename workspace in Analytics → Settings."});
+    rules.add({"short_code":"NMC-ANL-002","name":"Analytics table must have module prefix (CRM_, PEOPLE_, etc.)","category":"Naming","source_doc":"08_Analytics","modules":"Analytics","severity":"MEDIUM","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^(CRM_|CREATOR_|PEOPLE_|RECRUIT_|CATALYST_|FORMS_|MANUAL_|EXT_)[A-Z][a-zA-Z0-9]+$\",\"data_key\":\"analytics_tables\"}","expected":"CRM_Leads or PEOPLE_Employees","remediation":"Rename table in Analytics with the correct module prefix."});
+    rules.add({"short_code":"NMC-ANL-003","name":"Analytics dashboard: [Audience]_[Domain]_Dashboard","category":"Naming","source_doc":"08_Analytics","modules":"Analytics","severity":"MEDIUM","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^[A-Z][a-zA-Z]+_[A-Z][a-zA-Z]+_Dashboard$\",\"data_key\":\"analytics_dashboards\"}","expected":"Director_Revenue_Dashboard","remediation":"Rename dashboard in Analytics."});
+
+    // ── NAMING — Sigma ───────────────────────────────────────────────
+    rules.add({"short_code":"NMC-SGM-001","name":"Sigma extension unique name must have fci_ prefix","category":"Naming","source_doc":"03_Sigma","modules":"Sigma","severity":"HIGH","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^fci_[a-z][a-z0-9_]+$\",\"data_key\":\"sigma_extensions\"}","expected":"fci_lead_scorer","remediation":"Update extension unique name in Sigma Marketplace manifest."});
+    rules.add({"short_code":"NMC-SGM-002","name":"Sigma widget component names must be kebab-case","category":"Naming","source_doc":"03_Sigma","modules":"Sigma","severity":"MEDIUM","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^[a-z][a-z0-9-]+[a-z0-9]$\",\"data_key\":\"sigma_components\"}","expected":"lead-score-panel","remediation":"Rename component in Sigma extension manifest."});
+    rules.add({"short_code":"NMC-SGM-003","name":"Sigma connection names must be lowercase_underscore","category":"Naming","source_doc":"03_Sigma","modules":"Sigma","severity":"MEDIUM","check_type":"REGEX","pattern":"{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^[a-z][a-z0-9_]+[a-z0-9]$\",\"data_key\":\"sigma_connections\"}","expected":"sendgrid_email","remediation":"Rename connection in Sigma extension manifest."});
+
+    // ── SQL — Analytics ──────────────────────────────────────────────
+    rules.add({"short_code":"SQL-ANL-001","name":"Analytics SQL sub-query count must be 5 or fewer","category":"SQL","source_doc":"08_Analytics","modules":"Analytics","severity":"CRITICAL","check_type":"SQL_PARSE","pattern":"{\"type\":\"SQL_PARSE\",\"max_subqueries\":5,\"check_select_star\":false,\"data_key\":\"analytics_reports\"}","expected":"sub_queries <= 5","remediation":"Refactor the report SQL. Split complex queries into multiple reports or use pre-aggregated tables. See 08_Analytics_Standards.md Section 4."});
+    rules.add({"short_code":"SQL-ANL-002","name":"Analytics SQL must not use SELECT *","category":"SQL","source_doc":"08_Analytics","modules":"Analytics","severity":"HIGH","check_type":"SQL_PARSE","pattern":"{\"type\":\"SQL_PARSE\",\"max_subqueries\":99,\"check_select_star\":true,\"data_key\":\"analytics_reports\"}","expected":"Explicit column list","remediation":"Replace SELECT * with an explicit column list in the report SQL."});
+
+    // ── SECURITY ─────────────────────────────────────────────────────
+    rules.add({"short_code":"SEC-ALL-001","name":"No hardcoded API keys or tokens in Deluge functions","category":"Security","source_doc":"00_Cross_Module","modules":"ALL","severity":"CRITICAL","check_type":"MANUAL","pattern":"{}","expected":"All credentials via Zoho Connections or Org Variables","remediation":"Move credentials to Zoho Connections or Org Variables. Never put API keys or passwords in function code."});
+    rules.add({"short_code":"SEC-ALL-002","name":"No PII (name, email, phone) in info log statements","category":"Security","source_doc":"00_Cross_Module","modules":"ALL","severity":"HIGH","check_type":"MANUAL","pattern":"{}","expected":"No personal data in info() calls","remediation":"Remove personal data fields from all info() statements. Use record IDs only for logging."});
+    rules.add({"short_code":"SEC-ALL-003","name":"Sensitive fields (salary, medical) must have role restrictions","category":"Security","source_doc":"00_Cross_Module","modules":"People,CRM","severity":"CRITICAL","check_type":"MANUAL","pattern":"{}","expected":"Salary visible to HR/Director only","remediation":"Set field-level permissions in People/CRM field settings. Restrict salary to HR and Director roles."});
+
+    // ── Insert each rule if not already existing ─────────────────────
+    for each rule in rules
+    {
+        shortCode = rule.get("short_code");
+
+        // Check if rule already exists
+        existQuery   = "Rule_Short_Code = '" + shortCode + "'";
+        existRecords = zoho.creator.getRecords("fci_governance_scanner", "Rule_Repository", existQuery, 1, 1, "j-vivek@funaiconsulting.in");
+
+        if (existRecords.size() > 0)
+        {
+            skipped = skipped + 1;
+            continue;
+        }
+
+        // Insert rule
+        try
+        {
+            newRule = {
+                "Rule_Name":          rule.get("name"),
+                "Rule_Short_Code":    shortCode,
+                "Rule_Category":      rule.get("category"),
+                "Source_Document":    rule.get("source_doc"),
+                "Applicable_Modules": rule.get("modules"),
+                "Rule_Description":   rule.get("name"),
+                "Check_Type":         rule.get("check_type"),
+                "Check_Pattern":      rule.get("pattern"),
+                "Expected_Value":     rule.get("expected"),
+                "Severity":           rule.get("severity"),
+                "Is_Auto_Checkable":  (rule.get("check_type") != "MANUAL"),
+                "Remediation_Guide":  rule.get("remediation"),
+                "Rule_Status":        "Active",
+                "Last_Updated":       zoho.currentdate,
+                "Created_By":         "CRT_SeedRules_fn"
+            };
+            zoho.creator.createRecord("fci_governance_scanner", "Rule_Repository", newRule, "j-vivek@funaiconsulting.in");
+            inserted = inserted + 1;
+        }
+        catch (e)
+        {
+            errors = errors + 1;
+            info "[CRT_SeedRules_fn] Error inserting " + shortCode + ": " + e.getMessage();
+        }
+    }
+
+    info "[CRT_SeedRules_fn] Done. Inserted: " + inserted + " | Skipped: " + skipped + " | Errors: " + errors;
+    return {"inserted": inserted, "skipped": skipped, "errors": errors};
+}

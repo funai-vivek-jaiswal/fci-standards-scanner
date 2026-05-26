@@ -1,0 +1,103 @@
+/**
+ * Function:  CRT_GenerateScanReport_fn
+ * Module:    Creator - FCI_GovernanceScanner
+ * Purpose:   Build a plain-text scan summary and optionally send
+ *            an email report to the admin. Called at end of each scan.
+ * Params:    scanId (string)        - Scan_Session record ID
+ *            adminEmail (string)    - Recipient for the report email
+ * Returns:   string summary text
+ * Author:    India Tech Lead
+ * Modified:  2026-05-26 — initial version
+ */
+string function CRT_GenerateScanReport_fn(string scanId, string adminEmail)
+{
+    // ── Load scan session ────────────────────────────────────────────
+    sessionRec = zoho.creator.getRecordById("fci_governance_scanner", "Scan_Session", scanId, "j-vivek@funaiconsulting.in");
+
+    scanName     = sessionRec.get("Scan_Name");
+    scanDate     = sessionRec.get("Start_Time").toString("yyyy-MM-dd HH:mm");
+    passed       = sessionRec.get("Rules_Passed");
+    failed       = sessionRec.get("Rules_Failed");
+    warned       = sessionRec.get("Rules_Warned");
+    skipped      = sessionRec.get("Rules_Skipped");
+    total        = sessionRec.get("Total_Rules_Checked");
+    passRate     = sessionRec.get("Pass_Rate_Pct");
+    critFails    = sessionRec.get("Critical_Failures");
+    triggeredBy  = sessionRec.get("Triggered_By");
+
+    // ── Load critical/high findings ──────────────────────────────────
+    critQuery = "Scan_Session = '" + scanId + "' && Finding_Status = 'FAIL' && (Severity = 'CRITICAL' || Severity = 'HIGH')";
+    critFindings = zoho.creator.getRecords("fci_governance_scanner", "Scan_Finding", critQuery, 1, 20, "j-vivek@funaiconsulting.in");
+
+    // ── Build summary text ───────────────────────────────────────────
+    summary = "=======================================================\n";
+    summary = summary + "FCI GOVERNANCE SCANNER — SCAN REPORT\n";
+    summary = summary + "=======================================================\n";
+    summary = summary + "Scan:        " + scanName + "\n";
+    summary = summary + "Date:        " + scanDate + " IST\n";
+    summary = summary + "Triggered:   " + triggeredBy + "\n";
+    summary = summary + "-------------------------------------------------------\n";
+    summary = summary + "RESULTS SUMMARY\n";
+    summary = summary + "  Total Rules Checked : " + total + "\n";
+    summary = summary + "  ✅ Passed           : " + passed + "\n";
+    summary = summary + "  ❌ Failed           : " + failed + "\n";
+    summary = summary + "  ⚠️  Warned           : " + warned + "\n";
+    summary = summary + "  ⏭  Skipped          : " + skipped + "\n";
+    summary = summary + "  Pass Rate           : " + passRate + "%\n";
+    summary = summary + "  🔴 Critical Failures: " + critFails + "\n";
+    summary = summary + "-------------------------------------------------------\n";
+
+    if (critFindings.size() > 0)
+    {
+        summary = summary + "CRITICAL & HIGH FINDINGS:\n";
+        for each finding in critFindings
+        {
+            ruleName   = finding.get("Rule_Ref.Rule_Name");
+            modName    = finding.get("Module_Name");
+            recName    = finding.get("Source_Record_Name");
+            severity   = finding.get("Severity");
+            detail     = finding.get("Finding_Detail");
+            summary = summary + "  [" + severity + "] " + modName + " | " + recName + "\n";
+            summary = summary + "  Rule: " + ruleName + "\n";
+            summary = summary + "  → " + detail + "\n\n";
+        }
+    }
+    else
+    {
+        summary = summary + "✅ No critical or high severity failures found.\n";
+    }
+
+    summary = summary + "=======================================================\n";
+    summary = summary + "View full findings: https://creator.zoho.in/fci-governance-scanner\n";
+
+    // ── Update session with summary ──────────────────────────────────
+    zoho.creator.updateRecord(
+        "fci_governance_scanner",
+        "Scan_Session",
+        scanId,
+        {"Summary_Notes": summary},
+        "j-vivek@funaiconsulting.in"
+    );
+
+    // ── Send email ───────────────────────────────────────────────────
+    subject = "[FCI Scanner] " + scanName + " — Pass: " + passRate + "% | Critical: " + critFails;
+    if (critFails > 0)
+    {
+        subject = "🔴 " + subject;
+    }
+    else
+    {
+        subject = "✅ " + subject;
+    }
+
+    sendmail
+    [
+        from: zoho.adminuserid
+        to: adminEmail
+        subject: subject
+        message: "<pre>" + summary + "</pre>"
+        content type: html
+    ]
+
+    return summary;
+}

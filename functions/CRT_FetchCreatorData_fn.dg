@@ -1,0 +1,109 @@
+/**
+ * Function:  CRT_FetchCreatorData_fn
+ * Module:    Creator - FCI_GovernanceScanner
+ * Purpose:   Fetch metadata from Zoho Creator for compliance checking.
+ *            Retrieves forms, reports, functions, and field definitions.
+ * Params:    none
+ * Returns:   map containing structured Creator metadata lists
+ * Author:    India Tech Lead
+ * Modified:  2026-05-26 — initial version
+ */
+map function CRT_FetchCreatorData_fn()
+{
+    result = map();
+    ownerName  = zoho.orgs.getOrgVariable("ZOHO_CREATOR_OWNER");
+    appName    = zoho.orgs.getOrgVariable("ZOHO_CREATOR_APP_NAME");
+    baseUrl    = "https://creator.zoho.in/api/v2/" + ownerName + "/" + appName;
+    connName   = "conn_zoho_creator";
+
+    // ── Forms ────────────────────────────────────────────────────────
+    try
+    {
+        resp = invokeurl
+        [
+            url: baseUrl + "/form"
+            type: GET
+            connection: connName
+        ];
+        forms = resp.get("forms");
+        if (forms != null)
+        {
+            formList = list();
+            for each frm in forms
+            {
+                formList.add({
+                    "id": frm.get("link_name"),
+                    "name": frm.get("link_name"),
+                    "display_name": frm.get("display_name")
+                });
+            }
+            result.put("creator_forms", formList);
+        }
+    }
+    catch (e)
+    {
+        result.put("creator_forms", list());
+        info "[CRT_FetchCreatorData_fn] Failed forms: " + e.getMessage();
+    }
+
+    // ── Reports ──────────────────────────────────────────────────────
+    try
+    {
+        resp = invokeurl
+        [
+            url: baseUrl + "/report"
+            type: GET
+            connection: connName
+        ];
+        reports = resp.get("reports");
+        if (reports != null)
+        {
+            rptList = list();
+            for each rpt in reports
+            {
+                rptList.add({
+                    "id": rpt.get("link_name"),
+                    "name": rpt.get("link_name"),
+                    "display_name": rpt.get("display_name")
+                });
+            }
+            result.put("creator_reports", rptList);
+        }
+    }
+    catch (e)
+    {
+        result.put("creator_reports", list());
+    }
+
+    // ── Functions ────────────────────────────────────────────────────
+    try
+    {
+        resp = invokeurl
+        [
+            url: baseUrl + "/function"
+            type: GET
+            connection: connName
+        ];
+        functions = resp.get("functions");
+        if (functions != null)
+        {
+            fnList = list();
+            for each fn in functions
+            {
+                fnList.add({
+                    "id": fn.get("link_name"),
+                    "name": fn.get("link_name"),
+                    "display_name": fn.get("display_name")
+                });
+            }
+            result.put("creator_functions", fnList);
+        }
+    }
+    catch (e)
+    {
+        result.put("creator_functions", list());
+        info "[CRT_FetchCreatorData_fn] Failed functions: " + e.getMessage();
+    }
+
+    return result;
+}

@@ -1,0 +1,119 @@
+{
+  "form_name": "Reference_Data",
+  "display_name": "Reference Data",
+  "description": "Zoho platform limits, features, and best practices scraped from official documentation using Gemini AI. Updated weekly.",
+  "fields": [
+    {
+      "display_name": "Ref ID",
+      "api_name": "ref_id",
+      "type": "Auto Number",
+      "prefix": "REF-",
+      "start_from": 1,
+      "padding": 6
+    },
+    {
+      "display_name": "Platform",
+      "api_name": "platform",
+      "type": "Dropdown",
+      "required": true,
+      "options": [
+        "Zoho_CRM",
+        "Zoho_Creator",
+        "Zoho_People",
+        "Zoho_Analytics",
+        "Zoho_Catalyst",
+        "Zoho_Sigma",
+        "Zoho_Recruit",
+        "Zoho_Forms"
+      ]
+    },
+    {
+      "display_name": "Feature Name",
+      "api_name": "feature_name",
+      "type": "Single Line",
+      "required": true,
+      "hint": "e.g. CRM Daily API Limit, Analytics SQL Sub-query Max"
+    },
+    {
+      "display_name": "Category",
+      "api_name": "ref_category",
+      "type": "Dropdown",
+      "options": [
+        "API_Limit",
+        "Hard_Limit",
+        "Timeout",
+        "Best_Practice",
+        "Feature",
+        "Deprecation",
+        "New_Feature"
+      ]
+    },
+    {
+      "display_name": "Current Value",
+      "api_name": "current_value",
+      "type": "Single Line",
+      "hint": "e.g. '600 × active user licenses per day'"
+    },
+    {
+      "display_name": "Previous Value",
+      "api_name": "previous_value",
+      "type": "Single Line",
+      "hint": "Value before the last scrape (to detect changes)"
+    },
+    {
+      "display_name": "Changed",
+      "api_name": "has_changed",
+      "type": "Checkbox",
+      "default": false,
+      "hint": "Auto-set when current_value differs from previous_value"
+    },
+    {
+      "display_name": "Source URL",
+      "api_name": "source_url",
+      "type": "URL",
+      "hint": "Zoho documentation page that was scraped"
+    },
+    {
+      "display_name": "Gemini Summary",
+      "api_name": "gemini_summary",
+      "type": "Multi Line",
+      "hint": "AI-extracted structured notes and context"
+    },
+    {
+      "display_name": "Raw Content",
+      "api_name": "raw_content",
+      "type": "Multi Line",
+      "hint": "Raw scraped text from the documentation page"
+    },
+    {
+      "display_name": "Last Scraped",
+      "api_name": "last_scraped",
+      "type": "Date-Time"
+    },
+    {
+      "display_name": "Scrape Status",
+      "api_name": "scrape_status",
+      "type": "Dropdown",
+      "default": "PENDING",
+      "options": [
+        "SUCCESS",
+        "FAILED",
+        "PENDING"
+      ]
+    },
+    {
+      "display_name": "Related Rule",
+      "api_name": "related_rule",
+      "type": "Lookup",
+      "lookup_form": "Rule_Repository",
+      "lookup_display_field": "rule_name",
+      "hint": "Which governance rule this reference data validates"
+    }
+  ],
+  "indexes": ["platform", "ref_category", "has_changed", "scrape_status"],
+  "permissions": {
+    "Admin": "Create, Read, Update, Delete",
+    "Developer": "Read",
+    "Viewer": "Read"
+  }
+}

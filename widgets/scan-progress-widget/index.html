@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scan Progress</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <!-- IDLE STATE — shown when no scan is running -->
+    <section id="state-idle" class="state state--idle">
+        <div class="scan-icon">🔍</div>
+        <h2 class="scan-title">Governance Scanner</h2>
+        <p class="scan-subtitle">Check all FCI Zoho standards against live data</p>
+
+        <div class="scan-controls">
+            <button id="btn-full-scan" class="btn btn--primary" onclick="startScan('FULL')">
+                🔍 Run Full Scan
+            </button>
+            <div class="module-scan">
+                <select id="module-select" class="select">
+                    <option value="">Scan a single module…</option>
+                    <option value="CRM">CRM only</option>
+                    <option value="People">People only</option>
+                    <option value="Creator">Creator only</option>
+                    <option value="Analytics">Analytics only</option>
+                    <option value="Sigma">Sigma only</option>
+                    <option value="Recruit">Recruit only</option>
+                    <option value="Forms">Forms only</option>
+                </select>
+                <button id="btn-module-scan" class="btn btn--secondary" onclick="startModuleScan()">
+                    Scan →
+                </button>
+            </div>
+        </div>
+
+        <div id="last-scan-info" class="last-scan-info"></div>
+    </section>
+
+    <!-- RUNNING STATE — shown during active scan -->
+    <section id="state-running" class="state state--running" hidden>
+        <div class="running-header">
+            <span class="spinner" aria-label="Scanning…"></span>
+            <h2 class="scan-title">Scan in Progress…</h2>
+        </div>
+
+        <div class="progress-bar-wrap" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-bar-wrap">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <p class="progress-label" id="progress-label">Initialising…</p>
+
+        <div class="live-counts">
+            <div class="count-card count-card--pass">
+                <span class="count-icon">✅</span>
+                <span class="count-value" id="live-pass">0</span>
+                <span class="count-label">Passed</span>
+            </div>
+            <div class="count-card count-card--fail">
+                <span class="count-icon">❌</span>
+                <span class="count-value" id="live-fail">0</span>
+                <span class="count-label">Failed</span>
+            </div>
+            <div class="count-card count-card--warn">
+                <span class="count-icon">⚠️</span>
+                <span class="count-value" id="live-warn">0</span>
+                <span class="count-label">Warned</span>
+            </div>
+            <div class="count-card count-card--crit">
+                <span class="count-icon">🔴</span>
+                <span class="count-value" id="live-crit">0</span>
+                <span class="count-label">Critical</span>
+            </div>
+        </div>
+
+        <p class="scan-eta" id="scan-eta"></p>
+    </section>
+
+    <!-- DONE STATE — shown after scan completes -->
+    <section id="state-done" class="state state--done" hidden>
+        <div id="done-icon" class="done-icon">✅</div>
+        <h2 class="scan-title" id="done-title">Scan Complete</h2>
+
+        <div class="result-summary">
+            <div class="result-stat">
+                <span class="result-value" id="res-pass">—</span>
+                <span class="result-label">Passed</span>
+            </div>
+            <div class="result-stat">
+                <span class="result-value result-value--fail" id="res-fail">—</span>
+                <span class="result-label">Failed</span>
+            </div>
+            <div class="result-stat">
+                <span class="result-value result-value--warn" id="res-warn">—</span>
+                <span class="result-label">Warned</span>
+            </div>
+            <div class="result-stat">
+                <span class="result-value result-value--rate" id="res-rate">—</span>
+                <span class="result-label">Pass Rate</span>
+            </div>
+        </div>
+
+        <div class="done-actions">
+            <button class="btn btn--primary" onclick="viewFindings()">View Findings →</button>
+            <button class="btn btn--ghost"   onclick="resetToIdle()">Run Another Scan</button>
+        </div>
+    </section>
+
+    <script src="app.js"></script>
+</body>
+</html>

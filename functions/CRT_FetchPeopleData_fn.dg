@@ -1,0 +1,139 @@
+/**
+ * Function:  CRT_FetchPeopleData_fn
+ * Module:    Creator - FCI_GovernanceScanner
+ * Purpose:   Fetch metadata from Zoho People for compliance checking.
+ *            Retrieves custom forms, fields, functions, and alerts.
+ * Params:    none
+ * Returns:   map containing structured People metadata lists
+ * Author:    India Tech Lead
+ * Modified:  2026-05-26 — initial version
+ */
+map function CRT_FetchPeopleData_fn()
+{
+    result = map();
+    baseUrl = "https://people.zoho.in/api/v2";
+    connName = "conn_zoho_people";
+
+    // ── Custom Forms ─────────────────────────────────────────────────
+    try
+    {
+        resp = invokeurl
+        [
+            url: baseUrl + "/customforms"
+            type: GET
+            connection: connName
+        ];
+        forms = resp.get("forms");
+        if (forms != null)
+        {
+            formList = list();
+            for each frm in forms
+            {
+                formList.add({
+                    "id": frm.get("id"),
+                    "name": frm.get("name"),
+                    "api_name": frm.get("api_name")
+                });
+            }
+            result.put("people_forms", formList);
+        }
+    }
+    catch (e)
+    {
+        result.put("people_forms", list());
+        info "[CRT_FetchPeopleData_fn] Failed to fetch custom forms: " + e.getMessage();
+    }
+
+    // ── Custom Fields (across key modules) ───────────────────────────
+    peopleModules = {"employee", "leave", "attendance", "performance"};
+    allFields = list();
+    for each modName in peopleModules
+    {
+        try
+        {
+            resp = invokeurl
+            [
+                url: baseUrl + "/customfields?module=" + modName
+                type: GET
+                connection: connName
+            ];
+            fields = resp.get("fields");
+            if (fields != null)
+            {
+                for each field in fields
+                {
+                    allFields.add({
+                        "id": field.get("id"),
+                        "name": field.get("api_name"),
+                        "display_name": field.get("label"),
+                        "module": modName
+                    });
+                }
+            }
+        }
+        catch (e)
+        {
+            info "[CRT_FetchPeopleData_fn] Failed fields for " + modName + ": " + e.getMessage();
+        }
+    }
+    result.put("people_fields", allFields);
+
+    // ── Custom Functions ─────────────────────────────────────────────
+    try
+    {
+        resp = invokeurl
+        [
+            url: baseUrl + "/functions"
+            type: GET
+            connection: connName
+        ];
+        functions = resp.get("functions");
+        if (functions != null)
+        {
+            funcList = list();
+            for each fn in functions
+            {
+                funcList.add({
+                    "id": fn.get("id"),
+                    "name": fn.get("name")
+                });
+            }
+            result.put("people_functions", funcList);
+        }
+    }
+    catch (e)
+    {
+        result.put("people_functions", list());
+        info "[CRT_FetchPeopleData_fn] Failed functions: " + e.getMessage();
+    }
+
+    // ── Alerts ───────────────────────────────────────────────────────
+    try
+    {
+        resp = invokeurl
+        [
+            url: baseUrl + "/alerts"
+            type: GET
+            connection: connName
+        ];
+        alerts = resp.get("alerts");
+        if (alerts != null)
+        {
+            alertList = list();
+            for each alert in alerts
+            {
+                alertList.add({
+                    "id": alert.get("id"),
+                    "name": alert.get("name")
+                });
+            }
+            result.put("people_alerts", alertList);
+        }
+    }
+    catch (e)
+    {
+        result.put("people_alerts", list());
+    }
+
+    return result;
+}

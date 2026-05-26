@@ -1,0 +1,114 @@
+{
+  "form_name": "Remediation_Log",
+  "display_name": "Remediation Log",
+  "description": "Tracks the lifecycle of fixing a scan finding — from assignment through to verification and closure.",
+  "fields": [
+    {
+      "display_name": "Log ID",
+      "api_name": "log_id",
+      "type": "Auto Number",
+      "prefix": "REM-",
+      "start_from": 1,
+      "padding": 6
+    },
+    {
+      "display_name": "Finding",
+      "api_name": "finding_ref",
+      "type": "Lookup",
+      "lookup_form": "Scan_Finding",
+      "lookup_display_field": "finding_id",
+      "required": true
+    },
+    {
+      "display_name": "Assigned To",
+      "api_name": "assigned_to",
+      "type": "Single Line",
+      "required": true,
+      "hint": "Developer email responsible for fixing"
+    },
+    {
+      "display_name": "Assigned By",
+      "api_name": "assigned_by",
+      "type": "Single Line",
+      "hint": "Tech Lead or Manager who assigned the fix"
+    },
+    {
+      "display_name": "Assigned At",
+      "api_name": "assigned_at",
+      "type": "Date-Time",
+      "default": "Now"
+    },
+    {
+      "display_name": "Due Date",
+      "api_name": "due_date",
+      "type": "Date",
+      "hint": "When the fix must be completed"
+    },
+    {
+      "display_name": "Priority",
+      "api_name": "priority",
+      "type": "Dropdown",
+      "options": [
+        "Immediate",
+        "This_Sprint",
+        "This_Quarter",
+        "Backlog"
+      ],
+      "hint": "Derived from finding severity: CRITICAL=Immediate, HIGH=This_Sprint, etc."
+    },
+    {
+      "display_name": "Status",
+      "api_name": "remediation_status",
+      "type": "Dropdown",
+      "default": "Open",
+      "options": [
+        "Open",
+        "In_Progress",
+        "Fixed_Pending_Verify",
+        "Verified",
+        "Wont_Fix",
+        "False_Positive"
+      ]
+    },
+    {
+      "display_name": "Fix Description",
+      "api_name": "fix_description",
+      "type": "Multi Line",
+      "hint": "What was changed to fix the issue"
+    },
+    {
+      "display_name": "Fixed At",
+      "api_name": "fixed_at",
+      "type": "Date-Time"
+    },
+    {
+      "display_name": "Verified By",
+      "api_name": "verified_by",
+      "type": "Single Line",
+      "hint": "Tech Lead who verified the fix"
+    },
+    {
+      "display_name": "Verified At",
+      "api_name": "verified_at",
+      "type": "Date-Time"
+    },
+    {
+      "display_name": "Next Scan Confirmed",
+      "api_name": "next_scan_confirmed",
+      "type": "Checkbox",
+      "default": false,
+      "hint": "Set when next scan shows PASS for this rule+record"
+    },
+    {
+      "display_name": "Notes",
+      "api_name": "notes",
+      "type": "Multi Line"
+    }
+  ],
+  "indexes": ["remediation_status", "assigned_to", "due_date", "priority"],
+  "permissions": {
+    "Admin": "Create, Read, Update, Delete",
+    "Developer": "Create, Read, Update",
+    "Viewer": "Read"
+  }
+}

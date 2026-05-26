@@ -1,0 +1,114 @@
+/**
+ * Function:  CRT_FetchFormsData_fn
+ * Module:    Creator - FCI_GovernanceScanner
+ * Purpose:   Fetch metadata from Zoho Forms for compliance checking.
+ *            Retrieves form names, integrations, and notifications.
+ * Params:    none
+ * Returns:   map containing structured Forms metadata lists
+ * Author:    India Tech Lead
+ * Modified:  2026-05-26 — initial version
+ */
+map function CRT_FetchFormsData_fn()
+{
+    result = map();
+    baseUrl  = "https://forms.zoho.in/api/v1";
+    connName = "conn_zoho_forms";
+
+    // ── Forms ────────────────────────────────────────────────────────
+    formList = list();
+    try
+    {
+        resp = invokeurl
+        [
+            url: baseUrl + "/form"
+            type: GET
+            connection: connName
+        ];
+        forms = resp.get("forms");
+        if (forms != null)
+        {
+            for each frm in forms
+            {
+                formList.add({
+                    "id": frm.get("id"),
+                    "name": frm.get("name"),
+                    "status": frm.get("status")
+                });
+            }
+        }
+    }
+    catch (e)
+    {
+        info "[CRT_FetchFormsData_fn] Failed forms: " + e.getMessage();
+    }
+    result.put("forms_list", formList);
+
+    // ── Integrations + Notifications per form ────────────────────────
+    allIntegrations  = list();
+    allNotifications = list();
+
+    for each frm in formList
+    {
+        formId   = frm.get("id");
+        formName = frm.get("name");
+
+        // Integrations
+        try
+        {
+            resp = invokeurl
+            [
+                url: baseUrl + "/form/" + formId + "/integrations"
+                type: GET
+                connection: connName
+            ];
+            integrations = resp.get("integrations");
+            if (integrations != null)
+            {
+                for each integ in integrations
+                {
+                    allIntegrations.add({
+                        "id": integ.get("id"),
+                        "name": integ.get("name"),
+                        "form": formName
+                    });
+                }
+            }
+        }
+        catch (e)
+        {
+            info "[CRT_FetchFormsData_fn] Integrations error for " + formName + ": " + e.getMessage();
+        }
+
+        // Notifications
+        try
+        {
+            resp = invokeurl
+            [
+                url: baseUrl + "/form/" + formId + "/notifications"
+                type: GET
+                connection: connName
+            ];
+            notifs = resp.get("notifications");
+            if (notifs != null)
+            {
+                for each notif in notifs
+                {
+                    allNotifications.add({
+                        "id": notif.get("id"),
+                        "name": notif.get("name"),
+                        "form": formName
+                    });
+                }
+            }
+        }
+        catch (e)
+        {
+            info "[CRT_FetchFormsData_fn] Notifications error for " + formName + ": " + e.getMessage();
+        }
+    }
+
+    result.put("forms_integrations",  allIntegrations);
+    result.put("forms_notifications", allNotifications);
+
+    return result;
+}

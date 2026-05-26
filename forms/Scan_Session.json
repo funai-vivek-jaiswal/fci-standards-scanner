@@ -1,0 +1,152 @@
+{
+  "form_name": "Scan_Session",
+  "display_name": "Scan Session",
+  "description": "One record per scan run. Tracks status, timing, and aggregate counts for each compliance scan.",
+  "fields": [
+    {
+      "display_name": "Scan ID",
+      "api_name": "scan_id",
+      "type": "Auto Number",
+      "prefix": "SCN-",
+      "start_from": 1,
+      "padding": 6,
+      "required": true
+    },
+    {
+      "display_name": "Scan Name",
+      "api_name": "scan_name",
+      "type": "Single Line",
+      "max_length": 100,
+      "hint": "Auto-generated: e.g. Scan_FULL_2026-05-26_14-30"
+    },
+    {
+      "display_name": "Scan Type",
+      "api_name": "scan_type",
+      "type": "Dropdown",
+      "required": true,
+      "options": [
+        "FULL",
+        "CRM",
+        "People",
+        "Creator",
+        "Analytics",
+        "Sigma",
+        "Recruit",
+        "Forms",
+        "Catalyst",
+        "Naming_Only",
+        "Security_Only"
+      ]
+    },
+    {
+      "display_name": "Modules Scanned",
+      "api_name": "modules_scanned",
+      "type": "Multi-Select",
+      "options": [
+        "CRM",
+        "People",
+        "Creator",
+        "Analytics",
+        "Sigma",
+        "Recruit",
+        "Forms",
+        "Catalyst"
+      ]
+    },
+    {
+      "display_name": "Triggered By",
+      "api_name": "triggered_by",
+      "type": "Single Line",
+      "hint": "User email or 'automated'"
+    },
+    {
+      "display_name": "Status",
+      "api_name": "scan_status",
+      "type": "Dropdown",
+      "default": "QUEUED",
+      "options": [
+        "QUEUED",
+        "RUNNING",
+        "COMPLETED",
+        "FAILED",
+        "PARTIAL"
+      ]
+    },
+    {
+      "display_name": "Start Time",
+      "api_name": "start_time",
+      "type": "Date-Time"
+    },
+    {
+      "display_name": "End Time",
+      "api_name": "end_time",
+      "type": "Date-Time"
+    },
+    {
+      "display_name": "Duration (seconds)",
+      "api_name": "duration_seconds",
+      "type": "Number"
+    },
+    {
+      "display_name": "Total Rules Checked",
+      "api_name": "total_rules_checked",
+      "type": "Number",
+      "default": 0
+    },
+    {
+      "display_name": "Rules Passed",
+      "api_name": "rules_passed",
+      "type": "Number",
+      "default": 0
+    },
+    {
+      "display_name": "Rules Failed",
+      "api_name": "rules_failed",
+      "type": "Number",
+      "default": 0
+    },
+    {
+      "display_name": "Rules Warned",
+      "api_name": "rules_warned",
+      "type": "Number",
+      "default": 0
+    },
+    {
+      "display_name": "Rules Skipped",
+      "api_name": "rules_skipped",
+      "type": "Number",
+      "default": 0
+    },
+    {
+      "display_name": "Pass Rate %",
+      "api_name": "pass_rate_pct",
+      "type": "Decimal",
+      "decimal_places": 1,
+      "hint": "Calculated: (rules_passed / total_rules_checked) * 100"
+    },
+    {
+      "display_name": "Critical Failures",
+      "api_name": "critical_failures",
+      "type": "Number",
+      "default": 0
+    },
+    {
+      "display_name": "Error Log",
+      "api_name": "error_log",
+      "type": "Multi Line",
+      "hint": "Any API errors or exceptions encountered during scan"
+    },
+    {
+      "display_name": "Summary Notes",
+      "api_name": "summary_notes",
+      "type": "Multi Line",
+      "hint": "AI-generated or auto-generated summary of scan findings"
+    }
+  ],
+  "indexes": ["scan_status", "scan_type", "start_time"],
+  "permissions": {
+    "Admin": "Create, Read, Update, Delete",
+    "Developer": "Read",
+    "Viewer": "Read"
+  }
+}

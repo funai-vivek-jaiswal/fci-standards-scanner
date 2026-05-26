@@ -1,0 +1,9 @@
+module_name,connection_name,base_url,scopes_required,include_in_full_scan,notes
+CRM,conn_zoho_crm,https://www.zohoapis.in/crm/v7,"ZohoCRM.settings.functions.READ, ZohoCRM.settings.modules.READ, ZohoCRM.settings.fields.READ, ZohoCRM.settings.workflows.READ, ZohoCRM.settings.blueprints.READ",TRUE,Checks: functions / workflows / blueprints / custom fields / pipelines
+People,conn_zoho_people,https://people.zoho.in/api/v2,"ZOHOPEOPLE.custom.READ, ZOHOPEOPLE.appraisal.READ",TRUE,Checks: custom forms / custom fields / functions / alerts
+Creator,conn_zoho_creator,https://creator.zoho.in/api/v2,"ZohoCreator.meta.READ, ZohoCreator.data.READ",TRUE,Checks: forms / reports / functions / widgets
+Analytics,conn_zoho_analytics,https://analyticsapi.zoho.in/restapi/v2,"ZohoAnalytics.metadata.READ, ZohoAnalytics.data.READ",TRUE,Checks: workspaces / tables / reports (incl. SQL) / dashboards
+Sigma,conn_zoho_sigma,https://sigma.zoho.in/api/v1,ZohoSigma.extensions.READ,TRUE,Checks: extensions / components / functions / connections
+Recruit,conn_zoho_recruit,https://recruit.zoho.in/recruit/v2,ZohoRecruit.settings.READ,TRUE,Checks: custom modules / fields / workflows / functions
+Forms,conn_zoho_forms,https://forms.zoho.in/api/v1,ZohoForms.integration.READ,TRUE,Checks: form names / integrations / notifications
+Gemini_AI,conn_gemini_ai,https://generativelanguage.googleapis.com,API Key auth — store in Org Variable GEMINI_API_KEY_ENC,FALSE,Used by CRT_GeminiScrapeZoho_fn for weekly doc scraping. Not part of module scan.

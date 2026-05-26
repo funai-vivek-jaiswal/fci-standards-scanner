@@ -1,0 +1,169 @@
+{
+  "form_name": "Rule_Repository",
+  "display_name": "Rule Repository",
+  "description": "Master store of all FCI governance rules. Pre-seeded from standards documents 00-08.",
+  "fields": [
+    {
+      "display_name": "Rule ID",
+      "api_name": "rule_id",
+      "type": "Auto Number",
+      "prefix": "RUL-",
+      "start_from": 1,
+      "padding": 6,
+      "required": true
+    },
+    {
+      "display_name": "Rule Name",
+      "api_name": "rule_name",
+      "type": "Single Line",
+      "max_length": 150,
+      "required": true
+    },
+    {
+      "display_name": "Short Code",
+      "api_name": "rule_short_code",
+      "type": "Single Line",
+      "max_length": 20,
+      "unique": true,
+      "required": true,
+      "hint": "e.g. NMC-CRM-001 | SEC-ALL-003 | SQL-ANL-001"
+    },
+    {
+      "display_name": "Category",
+      "api_name": "rule_category",
+      "type": "Dropdown",
+      "required": true,
+      "options": [
+        "Naming",
+        "Deluge",
+        "Widget",
+        "Security",
+        "API_Limits",
+        "Git",
+        "SQL",
+        "Structure"
+      ]
+    },
+    {
+      "display_name": "Source Document",
+      "api_name": "source_document",
+      "type": "Dropdown",
+      "required": true,
+      "options": [
+        "00_Cross_Module",
+        "01_Catalyst",
+        "02_Creator",
+        "03_Sigma",
+        "04_CRM",
+        "05_People",
+        "06_Recruit",
+        "07_Forms",
+        "08_Analytics"
+      ]
+    },
+    {
+      "display_name": "Applicable Modules",
+      "api_name": "applicable_modules",
+      "type": "Multi-Select",
+      "required": true,
+      "options": [
+        "ALL",
+        "Creator",
+        "CRM",
+        "People",
+        "Recruit",
+        "Forms",
+        "Analytics",
+        "Sigma",
+        "Catalyst"
+      ]
+    },
+    {
+      "display_name": "Rule Description",
+      "api_name": "rule_description",
+      "type": "Multi Line",
+      "required": true,
+      "hint": "Full human-readable description of the rule"
+    },
+    {
+      "display_name": "Check Type",
+      "api_name": "check_type",
+      "type": "Dropdown",
+      "required": true,
+      "options": [
+        "REGEX",
+        "API_QUERY",
+        "VALUE_COMPARE",
+        "EXISTENCE",
+        "SQL_PARSE",
+        "MANUAL"
+      ]
+    },
+    {
+      "display_name": "Check Pattern (JSON)",
+      "api_name": "check_pattern",
+      "type": "Multi Line",
+      "hint": "JSON object defining the check logic. See design doc Section 5.2 for schema.",
+      "example": "{\"type\":\"REGEX\",\"target\":\"name\",\"pattern\":\"^CRM_[a-zA-Z]+_fn$\",\"data_key\":\"crm_functions\"}"
+    },
+    {
+      "display_name": "Expected Value",
+      "api_name": "expected_value",
+      "type": "Single Line",
+      "hint": "Human-readable expected result when rule passes"
+    },
+    {
+      "display_name": "Severity",
+      "api_name": "severity",
+      "type": "Dropdown",
+      "required": true,
+      "options": [
+        "CRITICAL",
+        "HIGH",
+        "MEDIUM",
+        "LOW"
+      ]
+    },
+    {
+      "display_name": "Auto Checkable",
+      "api_name": "is_auto_checkable",
+      "type": "Checkbox",
+      "default": true,
+      "hint": "Can this rule be checked programmatically by the scanner?"
+    },
+    {
+      "display_name": "Remediation Guide",
+      "api_name": "remediation_guide",
+      "type": "Multi Line",
+      "hint": "Step-by-step instructions for fixing a FAIL finding"
+    },
+    {
+      "display_name": "Status",
+      "api_name": "rule_status",
+      "type": "Dropdown",
+      "default": "Active",
+      "options": [
+        "Active",
+        "Inactive",
+        "Draft"
+      ]
+    },
+    {
+      "display_name": "Last Updated",
+      "api_name": "last_updated",
+      "type": "Date",
+      "default": "Today"
+    },
+    {
+      "display_name": "Created By",
+      "api_name": "created_by",
+      "type": "Single Line"
+    }
+  ],
+  "indexes": ["rule_status", "applicable_modules", "severity", "is_auto_checkable", "rule_category"],
+  "permissions": {
+    "Admin": "Create, Read, Update, Delete",
+    "Developer": "Read, Update",
+    "Viewer": "Read"
+  }
+}

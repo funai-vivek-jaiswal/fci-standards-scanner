@@ -1,0 +1,142 @@
+/**
+ * Function:  CRT_FetchRecruitData_fn
+ * Module:    Creator - FCI_GovernanceScanner
+ * Purpose:   Fetch metadata from Zoho Recruit for compliance checking.
+ *            Retrieves custom modules, fields, workflows, and functions.
+ * Params:    none
+ * Returns:   map containing structured Recruit metadata lists
+ * Author:    India Tech Lead
+ * Modified:  2026-05-26 — initial version
+ */
+map function CRT_FetchRecruitData_fn()
+{
+    result = map();
+    baseUrl  = "https://recruit.zoho.in/recruit/v2";
+    connName = "conn_zoho_recruit";
+
+    // ── Custom Modules ───────────────────────────────────────────────
+    try
+    {
+        resp = invokeurl
+        [
+            url: baseUrl + "/settings/modules"
+            type: GET
+            connection: connName
+        ];
+        modules = resp.get("modules");
+        if (modules != null)
+        {
+            modList = list();
+            for each mod in modules
+            {
+                if (mod.get("generated_type") == "custom")
+                {
+                    modList.add({
+                        "id": mod.get("id"),
+                        "name": mod.get("api_name")
+                    });
+                }
+            }
+            result.put("recruit_modules", modList);
+        }
+    }
+    catch (e)
+    {
+        result.put("recruit_modules", list());
+        info "[CRT_FetchRecruitData_fn] Failed modules: " + e.getMessage();
+    }
+
+    // ── Custom Fields ────────────────────────────────────────────────
+    recruitModules = {"Candidates", "JobOpenings", "Interviews"};
+    allFields = list();
+    for each modName in recruitModules
+    {
+        try
+        {
+            resp = invokeurl
+            [
+                url: baseUrl + "/settings/fields?module=" + modName
+                type: GET
+                connection: connName
+            ];
+            fields = resp.get("fields");
+            if (fields != null)
+            {
+                for each field in fields
+                {
+                    if (field.get("custom_field") == true)
+                    {
+                        allFields.add({
+                            "id": field.get("id"),
+                            "name": field.get("api_name"),
+                            "module": modName
+                        });
+                    }
+                }
+            }
+        }
+        catch (e)
+        {
+            info "[CRT_FetchRecruitData_fn] Fields error for " + modName + ": " + e.getMessage();
+        }
+    }
+    result.put("recruit_fields", allFields);
+
+    // ── Custom Functions ─────────────────────────────────────────────
+    try
+    {
+        resp = invokeurl
+        [
+            url: baseUrl + "/settings/functions"
+            type: GET
+            connection: connName
+        ];
+        functions = resp.get("functions");
+        if (functions != null)
+        {
+            fnList = list();
+            for each fn in functions
+            {
+                fnList.add({
+                    "id": fn.get("id"),
+                    "name": fn.get("name")
+                });
+            }
+            result.put("recruit_functions", fnList);
+        }
+    }
+    catch (e)
+    {
+        result.put("recruit_functions", list());
+    }
+
+    // ── Workflows ────────────────────────────────────────────────────
+    try
+    {
+        resp = invokeurl
+        [
+            url: baseUrl + "/settings/automation/workflow_rules"
+            type: GET
+            connection: connName
+        ];
+        workflows = resp.get("workflow_rules");
+        if (workflows != null)
+        {
+            wfList = list();
+            for each wf in workflows
+            {
+                wfList.add({
+                    "id": wf.get("id"),
+                    "name": wf.get("name")
+                });
+            }
+            result.put("recruit_workflows", wfList);
+        }
+    }
+    catch (e)
+    {
+        result.put("recruit_workflows", list());
+    }
+
+    return result;
+}

@@ -1,0 +1,61 @@
+/**
+ * Function:  CRT_SendCriticalAlert_fn
+ * Module:    Creator - FCI_GovernanceScanner
+ * Purpose:   Send an immediate email alert when critical failures are
+ *            detected during a scan. Lists all critical findings inline.
+ * Params:    scanId (string)       - Scan_Session record ID
+ *            critCount (int)       - Number of critical failures
+ *            triggeredBy (string)  - User who triggered the scan
+ * Returns:   void
+ * Author:    India Tech Lead
+ * Modified:  2026-05-26 — initial version
+ */
+void function CRT_SendCriticalAlert_fn(string scanId, int critCount, string triggeredBy)
+{
+    adminEmail = zoho.orgs.getOrgVariable("SCAN_ADMIN_EMAIL");
+
+    // Load critical findings for this scan
+    critQuery    = "Scan_Session = '" + scanId + "' && Finding_Status = 'FAIL' && Severity = 'CRITICAL'";
+    critFindings = zoho.creator.getRecords("fci_governance_scanner", "Scan_Finding", critQuery, 1, 50, "j-vivek@funaiconsulting.in");
+
+    // Build email body
+    body = "<h2 style='color:#cc0000;'>🔴 FCI Governance Scanner — CRITICAL FAILURES DETECTED</h2>";
+    body = body + "<p><strong>Scan ID:</strong> " + scanId + "<br/>";
+    body = body + "<strong>Triggered by:</strong> " + triggeredBy + "<br/>";
+    body = body + "<strong>Critical failures:</strong> " + critCount + "</p>";
+    body = body + "<hr/>";
+    body = body + "<h3>Critical Findings:</h3>";
+    body = body + "<table border='1' cellpadding='6' style='border-collapse:collapse;font-family:monospace;font-size:13px;'>";
+    body = body + "<tr style='background:#cc0000;color:white;'><th>Module</th><th>Record</th><th>Rule</th><th>Detail</th><th>Fix</th></tr>";
+
+    for each finding in critFindings
+    {
+        module     = finding.get("Module_Name");
+        record     = finding.get("Source_Record_Name");
+        ruleName   = finding.get("Rule_Ref.Rule_Name");
+        detail     = finding.get("Finding_Detail");
+        remedGuide = finding.get("Rule_Ref.Remediation_Guide");
+
+        body = body + "<tr>";
+        body = body + "<td>" + module + "</td>";
+        body = body + "<td><code>" + record + "</code></td>";
+        body = body + "<td>" + ruleName + "</td>";
+        body = body + "<td>" + detail + "</td>";
+        body = body + "<td>" + ifnull(remedGuide, "See standards doc") + "</td>";
+        body = body + "</tr>";
+    }
+
+    body = body + "</table>";
+    body = body + "<hr/>";
+    body = body + "<p><a href='https://creator.zoho.in/fci-governance-scanner/findings'>View all findings →</a></p>";
+    body = body + "<p style='color:#888;font-size:12px;'>This is an automated alert from the FCI Governance Scanner.</p>";
+
+    sendmail
+    [
+        from: zoho.adminuserid
+        to: adminEmail
+        subject: "🔴 [FCI CRITICAL] " + critCount + " critical governance failure(s) detected — Scan " + scanId
+        message: body
+        content type: html
+    ]
+}

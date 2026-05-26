@@ -1,0 +1,139 @@
+{
+  "form_name": "Scan_Finding",
+  "display_name": "Scan Finding",
+  "description": "One record per rule-check result within a scan. Stores pass/fail/warn status, the offending record, and remediation tracking.",
+  "fields": [
+    {
+      "display_name": "Finding ID",
+      "api_name": "finding_id",
+      "type": "Auto Number",
+      "prefix": "FND-",
+      "start_from": 1,
+      "padding": 6,
+      "required": true
+    },
+    {
+      "display_name": "Scan Session",
+      "api_name": "scan_session",
+      "type": "Lookup",
+      "lookup_form": "Scan_Session",
+      "lookup_display_field": "scan_name",
+      "required": true
+    },
+    {
+      "display_name": "Rule",
+      "api_name": "rule_ref",
+      "type": "Lookup",
+      "lookup_form": "Rule_Repository",
+      "lookup_display_field": "rule_name",
+      "required": true
+    },
+    {
+      "display_name": "Module",
+      "api_name": "module_name",
+      "type": "Single Line",
+      "hint": "e.g. CRM, People, Analytics"
+    },
+    {
+      "display_name": "Source Record ID",
+      "api_name": "source_record_id",
+      "type": "Single Line",
+      "hint": "ID of the offending record in the source Zoho module"
+    },
+    {
+      "display_name": "Source Record Name",
+      "api_name": "source_record_name",
+      "type": "Single Line",
+      "hint": "Human-readable name of the offending item (e.g. function name, field API name)"
+    },
+    {
+      "display_name": "Finding Status",
+      "api_name": "finding_status",
+      "type": "Dropdown",
+      "required": true,
+      "options": [
+        "PASS",
+        "FAIL",
+        "WARNING",
+        "SKIPPED",
+        "ERROR"
+      ]
+    },
+    {
+      "display_name": "Finding Detail",
+      "api_name": "finding_detail",
+      "type": "Multi Line",
+      "hint": "Specific explanation of what failed and why"
+    },
+    {
+      "display_name": "Actual Value",
+      "api_name": "actual_value",
+      "type": "Single Line",
+      "hint": "What was found in the live system"
+    },
+    {
+      "display_name": "Expected Value",
+      "api_name": "expected_value",
+      "type": "Single Line",
+      "hint": "What it should be per the standard"
+    },
+    {
+      "display_name": "Severity",
+      "api_name": "severity",
+      "type": "Dropdown",
+      "options": [
+        "CRITICAL",
+        "HIGH",
+        "MEDIUM",
+        "LOW"
+      ],
+      "hint": "Inherited from the rule"
+    },
+    {
+      "display_name": "Acknowledged",
+      "api_name": "is_acknowledged",
+      "type": "Checkbox",
+      "default": false,
+      "hint": "Set to true when a developer has reviewed and accepted the finding"
+    },
+    {
+      "display_name": "Acknowledged By",
+      "api_name": "acknowledged_by",
+      "type": "Single Line"
+    },
+    {
+      "display_name": "Acknowledged At",
+      "api_name": "acknowledged_at",
+      "type": "Date-Time"
+    },
+    {
+      "display_name": "Remediated",
+      "api_name": "is_remediated",
+      "type": "Checkbox",
+      "default": false,
+      "hint": "Set to true when the finding has been fixed"
+    },
+    {
+      "display_name": "Remediated By",
+      "api_name": "remediated_by",
+      "type": "Single Line"
+    },
+    {
+      "display_name": "Remediated At",
+      "api_name": "remediated_at",
+      "type": "Date-Time"
+    },
+    {
+      "display_name": "Remediation Notes",
+      "api_name": "remediation_notes",
+      "type": "Multi Line",
+      "hint": "What was done to fix the issue"
+    }
+  ],
+  "indexes": ["scan_session", "finding_status", "severity", "module_name", "is_remediated", "rule_ref"],
+  "permissions": {
+    "Admin": "Create, Read, Update, Delete",
+    "Developer": "Read, Update",
+    "Viewer": "Read"
+  }
+}

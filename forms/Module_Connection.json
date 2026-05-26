@@ -1,0 +1,94 @@
+{
+  "form_name": "Module_Connection",
+  "display_name": "Module Connection",
+  "description": "Configuration for each Zoho module API connection used by the scanner. One record per module.",
+  "fields": [
+    {
+      "display_name": "Module",
+      "api_name": "module_name",
+      "type": "Dropdown",
+      "required": true,
+      "unique": true,
+      "options": [
+        "CRM",
+        "People",
+        "Creator",
+        "Analytics",
+        "Sigma",
+        "Recruit",
+        "Forms",
+        "Catalyst",
+        "Gemini_AI"
+      ]
+    },
+    {
+      "display_name": "Connection Name",
+      "api_name": "connection_name",
+      "type": "Single Line",
+      "required": true,
+      "hint": "Zoho Creator Connection API name. e.g. conn_zoho_crm"
+    },
+    {
+      "display_name": "Base URL",
+      "api_name": "base_url",
+      "type": "Single Line",
+      "required": true,
+      "hint": "e.g. https://www.zohoapis.in/crm/v7"
+    },
+    {
+      "display_name": "Status",
+      "api_name": "connection_status",
+      "type": "Dropdown",
+      "default": "INACTIVE",
+      "options": [
+        "ACTIVE",
+        "INACTIVE",
+        "ERROR"
+      ]
+    },
+    {
+      "display_name": "Last Tested",
+      "api_name": "last_tested",
+      "type": "Date-Time"
+    },
+    {
+      "display_name": "Test Result",
+      "api_name": "test_result",
+      "type": "Single Line",
+      "hint": "Result of the last connection test (e.g. '200 OK' or error message)"
+    },
+    {
+      "display_name": "Scopes Required",
+      "api_name": "scopes_required",
+      "type": "Multi Line",
+      "hint": "Comma-separated OAuth scopes. e.g. ZohoCRM.settings.functions.READ"
+    },
+    {
+      "display_name": "Include in Full Scan",
+      "api_name": "include_in_full_scan",
+      "type": "Checkbox",
+      "default": true,
+      "hint": "Set to false to exclude this module from full scans"
+    },
+    {
+      "display_name": "Notes",
+      "api_name": "notes",
+      "type": "Multi Line"
+    }
+  ],
+  "seed_data": [
+    { "module_name": "CRM",       "connection_name": "conn_zoho_crm",       "base_url": "https://www.zohoapis.in/crm/v7",              "scopes_required": "ZohoCRM.settings.functions.READ, ZohoCRM.settings.modules.READ, ZohoCRM.settings.fields.READ, ZohoCRM.settings.workflows.READ, ZohoCRM.settings.blueprints.READ" },
+    { "module_name": "People",    "connection_name": "conn_zoho_people",    "base_url": "https://people.zoho.in/api/v2",               "scopes_required": "ZOHOPEOPLE.custom.READ, ZOHOPEOPLE.appraisal.READ" },
+    { "module_name": "Creator",   "connection_name": "conn_zoho_creator",   "base_url": "https://creator.zoho.in/api/v2",              "scopes_required": "ZohoCreator.meta.READ, ZohoCreator.data.READ" },
+    { "module_name": "Analytics", "connection_name": "conn_zoho_analytics", "base_url": "https://analyticsapi.zoho.in/restapi/v2",     "scopes_required": "ZohoAnalytics.metadata.READ, ZohoAnalytics.data.READ" },
+    { "module_name": "Sigma",     "connection_name": "conn_zoho_sigma",     "base_url": "https://sigma.zoho.in/api/v1",                "scopes_required": "ZohoSigma.extensions.READ" },
+    { "module_name": "Recruit",   "connection_name": "conn_zoho_recruit",   "base_url": "https://recruit.zoho.in/recruit/v2",          "scopes_required": "ZohoRecruit.settings.READ" },
+    { "module_name": "Forms",     "connection_name": "conn_zoho_forms",     "base_url": "https://forms.zoho.in/api/v1",                "scopes_required": "ZohoForms.integration.READ" },
+    { "module_name": "Gemini_AI", "connection_name": "conn_gemini_ai",      "base_url": "https://generativelanguage.googleapis.com",   "scopes_required": "API Key auth (store in Org Variable GEMINI_API_KEY_ENC)" }
+  ],
+  "permissions": {
+    "Admin": "Create, Read, Update, Delete",
+    "Developer": "Read",
+    "Viewer": "Read"
+  }
+}
