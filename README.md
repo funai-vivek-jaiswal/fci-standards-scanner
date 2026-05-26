@@ -1,4 +1,4 @@
-# Governance Scanner — Zoho Creator App
+# FCI Standard Scanner — Zoho Creator App
 
 **Application Name in Creator:** `FCI_GovernanceScanner`  
 **Platform:** Zoho Creator  
