@@ -1,5 +1,16 @@
 # 04 — Zoho CRM Standards & Best Practices
 
+> **📚 Source Classification Key** — Standards in this document are labelled:  
+> 🔵 **Zoho Official** — Directly verified from Zoho's official documentation or API specs  
+> 🟢 **FCI Internal** — FCI's own policy/convention (not mandated by Zoho; documented in `10_Sources_and_Validation.md`)  
+> 🟡 **Community** — Observed pattern from Zoho Community forums, partner blogs, or marketplace examples  
+> 🔴 **Unverified** — Stated in good faith; official source not yet confirmed — validate before enforcing  
+> ⚠️ **Correction** — Found to differ from official docs; see `10_Sources_and_Validation.md §3`
+>
+> _Full source citation table: [10_Sources_and_Validation.md](./10_Sources_and_Validation.md)_
+
+---
+
 ## 1. Module & Layout Naming
 
 - Standard modules: use Zoho defaults (Leads, Contacts, Accounts, Deals)
@@ -152,15 +163,33 @@ void Lead_ScoreCalculation_fn(String leadId)
 
 ## 10. CRM API Limits & Best Practices
 
-### 10.1 Daily API Call Limits (approximate — verify current plan)
+### 10.1 Daily API Call Limits
 
-| Plan         | API Calls / Day       |
-|--------------|-----------------------|
-| Free         | 5,000                 |
-| Standard     | Licenses × 250        |
-| Professional | Licenses × 500        |
-| Enterprise   | Licenses × 500        |
-| Ultimate     | Licenses × 1,000      |
+| Plan | Base Credits/Day | Per-User Credits | Max Credits/Day | Concurrent Requests |
+|------|-----------------|------------------|-----------------|---------------------|
+| Free | 5,000 | — | 5,000 | 5 |
+| Standard / Starter | 50,000 | +250 per user | 100,000 | 10 |
+| Professional | 50,000 | +500 per user | 3,000,000 | 15 |
+| Enterprise / Zoho One | 50,000 | +1,000 per user | 5,000,000 | 20 |
+| Ultimate / CRM Plus | 50,000 | +2,000 per user | Unlimited | 25 |
+
+> ⚠️ **Correction note (2026-05-27):** Previous version listed Enterprise as "Licenses×500" and Ultimate as "Licenses×1,000" — both were wrong. The correct structure is a **50,000 base + per-user credits** model with a plan maximum. Source verified at [Zoho CRM API Limits](https://www.zoho.com/crm/developer/docs/api/v7/api-limits.html).
+>
+> Sub-concurrency limit: **10 concurrent** for all editions for these operations: Get Records (with cvid/sort_by), Convert Lead, Insert/Update/Upsert (>10 records), Send Mail, Search Records, Query, and Composite APIs.
+
+### 10.1a Per-Operation Credit Costs (🔵 Zoho Official)
+
+| Operation | Credit Cost |
+|---|---|
+| Standard GET/POST (Users, Modules, Metadata) | 1 credit |
+| Batch Insert/Update/Upsert (per 10 records) | 1 credit |
+| Add/Remove Tags (per 50 records) | 1 credit |
+| Mass Delete (per 100 records) | 1 credit |
+| Convert Lead | 5 credits |
+| Send Mail | 20 credits |
+| Merge Records | 50 credits |
+| Mass Convert Leads | 200 credits |
+| Bulk Write Initialize | 500 credits |
 
 ### 10.2 Per-Operation Limits
 
@@ -172,6 +201,8 @@ void Lead_ScoreCalculation_fn(String leadId)
 | Custom function execution timeout      | 15 seconds                         |
 | Standalone function execution timeout  | 30 seconds                         |
 | Blueprint transitions per record/day   | 50                                 |
+
+> ⚠️ **Unverified limits:** Custom function timeout (15s), Standalone function timeout (30s), and Blueprint transitions/day (50) were documented based on community knowledge — **not confirmed from official Zoho docs**. Validate at [Zoho CRM developer docs](https://www.zoho.com/crm/developer/docs/) before enforcing. Mark these as 🔴 until verified.
 
 ### 10.3 API Field Name Rules
 
@@ -210,3 +241,24 @@ for each contact in contactsList
 - Restrict IP for API user where possible
 - Profile permissions review quarterly — remove ex-employee access immediately
 - See → [00_Cross_Module_Standards.md#security-checklist]
+
+---
+
+## 📚 Source Classification
+
+| Standard / Section | Source | Notes |
+|---|---|---|
+| Module/Layout naming (PascalCase, no "Copy of") | 🟢 FCI Internal | FCI convention; Zoho has no enforced naming policy |
+| API field names are permanent once created | 🔵 Zoho Official | Documented in Zoho CRM developer docs; changing requires delete + recreate |
+| UPPER_SNAKE_CASE for API field names | 🔵 Zoho Official | Zoho CRM API returns fields in UPPER_SNAKE_CASE — zoho.com/crm/developer/ |
+| Pipeline naming: [Market]_[ProductLine]_Pipeline | 🟢 FCI Internal | FCI naming convention |
+| Blueprint max 15 states | 🟡 Community | Widely recommended; not an official hard limit — validate in your org |
+| Custom function naming: [Module]_[Action]_fn | 🟢 FCI Internal | FCI naming convention (part of cross-module standards) |
+| Custom function timeout: 15 seconds | 🔴 Unverified | From community knowledge; not confirmed in official docs — verify at zoho.com/crm/developer/ |
+| Standalone function timeout: 30 seconds | 🔴 Unverified | From community knowledge; not confirmed in official docs |
+| Blueprint transitions/day limit: 50 | 🔴 Unverified | From community knowledge; verify in official Zoho CRM limits docs |
+| Daily API credit limits table | 🔵 Zoho Official | **Corrected 2026-05-27** from zoho.com/crm/developer/docs/api/v7/api-limits.html — previous Enterprise/Ultimate values were wrong |
+| Per-operation credit costs | 🔵 Zoho Official | Verified from zoho.com/crm/developer/docs/api/v7/api-limits.html |
+| Batch 100 records per Insert/Update/Upsert | 🔵 Zoho Official | Verified from official API limits page |
+| getRecords returns 200 records max per page | 🔵 Zoho Official | Standard Zoho CRM pagination limit |
+| CRM security — field-level, audit log, dedicated API user | 🟢 FCI Internal | FCI security policy (extends Zoho's basic security features) |

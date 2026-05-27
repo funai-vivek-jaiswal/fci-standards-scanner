@@ -7,6 +7,17 @@
 
 ---
 
+> **📚 Source Classification Key** — Standards in this document are labelled:  
+> 🔵 **Zoho Official** — Directly verified from Zoho's official documentation or API specs  
+> 🟢 **FCI Internal** — FCI's own policy/convention (not mandated by Zoho; documented in `10_Sources_and_Validation.md`)  
+> 🟡 **Community** — Observed pattern from Zoho Community forums, partner blogs, or marketplace examples  
+> 🔴 **Unverified** — Stated in good faith; official source not yet confirmed — validate before enforcing  
+> ⚠️ **Correction** — Found to differ from official docs; see `10_Sources_and_Validation.md §3`
+>
+> _Full source citation table: [10_Sources_and_Validation.md](./10_Sources_and_Validation.md)_
+
+---
+
 ## Table of Contents
 
 1. [Extension Naming](#1-extension-naming)
@@ -705,3 +716,19 @@ When a MAJOR version is released:
 ---
 
 *End of 03 — Zoho Sigma Standards & Best Practices*
+
+---
+
+## 📚 Source Classification
+
+| Standard / Section | Source | Notes |
+|---|---|---|
+| Extension unique name format: `fci_[name]` lowercase underscore | 🟢 FCI Internal | FCI naming policy; Sigma requires unique names but no specific format mandated |
+| plugin.json (manifest) structure | 🔵 Zoho Official | plugin.json is the official Sigma manifest format — help.zoho.com/portal/en/kb/sigma/ |
+| Deluge in Sigma uses invokeurl with connection: parameter | 🔵 Zoho Official | Zoho Connections official mechanism for OAuth in extensions |
+| Sigma Extension Gallery submission requirements | 🔵 Zoho Official | Zoho Marketplace / Sigma review process — marketplace.zoho.com |
+| Semantic versioning (1.0.0) | 🟡 Community | Industry standard (semver.org); adopted by Zoho but not Sigma-specific |
+| CHANGELOG.md format | 🟢 FCI Internal | FCI documentation standard |
+| SGM_ function prefix | 🟢 FCI Internal | Part of FCI module prefix system — see 00_Cross_Module_Standards.md |
+| Extension must not store credentials in widget code | 🔵 Zoho Official | Violates Zoho Marketplace security requirements |
+| Correct Sigma documentation URL | 🔵 Zoho Official | **Verified URL:** https://help.zoho.com/portal/en/kb/sigma/ (previous URL zoho.com/sigma/help/ returns 404) |

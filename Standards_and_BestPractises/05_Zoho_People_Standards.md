@@ -6,6 +6,17 @@
 
 ---
 
+> **📚 Source Classification Key** — Standards in this document are labelled:  
+> 🔵 **Zoho Official** — Directly verified from Zoho's official documentation or API specs  
+> 🟢 **FCI Internal** — FCI's own policy/convention (not mandated by Zoho; documented in `10_Sources_and_Validation.md`)  
+> 🟡 **Community** — Observed pattern from Zoho Community forums, partner blogs, or marketplace examples  
+> 🔴 **Unverified** — Stated in good faith; official source not yet confirmed — validate before enforcing  
+> ⚠️ **Correction** — Found to differ from official docs; see `10_Sources_and_Validation.md §3`
+>
+> _Full source citation table: [10_Sources_and_Validation.md](./10_Sources_and_Validation.md)_
+
+---
+
 ## Table of Contents
 
 1. [Module & Form Naming](#1-module--form-naming)
@@ -511,3 +522,19 @@ Before activating the Recruit-to-People integration in production:
 *Document owner: India Manager — HR Systems*
 *Last reviewed: 2026-05-25*
 *Next review due: 2027-01-01*
+
+---
+
+## 📚 Source Classification
+
+| Standard / Section | Source | Notes |
+|---|---|---|
+| PEO_ function prefix | 🟢 FCI Internal | Part of FCI module prefix system |
+| HR audit log — employee ID, field, old/new value, timestamp, triggered-by | 🟢 FCI Internal | FCI policy for HR data changes; goes beyond Zoho's built-in audit |
+| People SDK — ZOHO.People.getCurrentUser() | 🔵 Zoho Official | Official Zoho People widget SDK |
+| People API availability | 🔵 Zoho Official | People API available on Essential HR, Professional, Premium, Enterprise plans — verified at zoho.com/people/api/overview.html |
+| Alert naming: [Event]_[Audience]_Alert | 🟢 FCI Internal | FCI naming convention |
+| Salary data restricted to HR + Director only | 🟢 FCI Internal | FCI role-based access policy |
+| People API correct URL | 🔵 Zoho Official | **Verified URL:** https://www.zoho.com/people/api/overview.html (previous path /api/overview/ returns 404) |
+| Custom function logging for HR records | 🟢 FCI Internal | FCI compliance requirement (GDPR/APPI alignment for Japan) |
+| Leave policy, attendance — field naming conventions | 🟢 FCI Internal | FCI convention; People does not mandate field naming |

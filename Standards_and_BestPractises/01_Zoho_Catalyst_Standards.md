@@ -5,6 +5,15 @@
 > **Last updated:** 2026-05-25  
 > **Status:** Active
 
+> **📚 Source Classification Key** — Standards in this document are labelled:  
+> 🔵 **Zoho Official** — Directly verified from Zoho's official documentation or API specs  
+> 🟢 **FCI Internal** — FCI's own policy/convention (not mandated by Zoho; documented in `10_Sources_and_Validation.md`)  
+> 🟡 **Community** — Observed pattern from Zoho Community forums, partner blogs, or marketplace examples  
+> 🔴 **Unverified** — Stated in good faith; official source not yet confirmed — validate before enforcing  
+> ⚠️ **Correction** — Found to differ from official docs; see `10_Sources_and_Validation.md §3`
+>
+> _Full source citation table: [10_Sources_and_Validation.md](./10_Sources_and_Validation.md)_
+
 ---
 
 ## Table of Contents
@@ -1123,3 +1132,20 @@ All commits related to Catalyst must follow this commit message format:
 
 → Cross-module standards: [00_Cross_Module_Standards.md]  
 → Web app (HTML/JS/CSS): see Widget Standards in [00_Cross_Module_Standards.md]
+
+---
+
+## 📚 Source Classification
+
+| Standard / Section | Source | Notes |
+|---|---|---|
+| Catalyst uses Node.js / Java / Python (not Deluge) | 🔵 Zoho Official | Catalyst serverless functions officially support Node.js, Java, Python — docs.catalyst.zoho.com/en/ |
+| DataStore table naming — PascalCase | 🟢 FCI Internal | FCI convention; Catalyst does not mandate a naming style |
+| DataStore column naming — snake_case | 🟡 Community | Aligns with SQL and Zoho API conventions; not formally mandated by Catalyst |
+| Environment variables via Catalyst App Config | 🔵 Zoho Official | App Config is the official Catalyst mechanism for env vars — docs.catalyst.zoho.com/en/ |
+| Cron job naming: cron-[frequency]-[action] | 🟢 FCI Internal | FCI naming convention; Catalyst has no naming requirement |
+| Catalyst SDK usage (@zohocatalyst/datastore etc.) | 🔵 Zoho Official | Official Catalyst SDKs — docs.catalyst.zoho.com/en/ |
+| catalyst.json configuration file | 🔵 Zoho Official | Official Catalyst project config file |
+| Deployment via Catalyst CLI | 🔵 Zoho Official | Official deployment mechanism — docs.catalyst.zoho.com/en/ |
+| Max function execution time | 🔴 Unverified | Stated as platform limit; verify at docs.catalyst.zoho.com/en/ — limits vary by Catalyst plan |
+| No console.log in production | 🟢 FCI Internal | FCI security policy (log hygiene) |

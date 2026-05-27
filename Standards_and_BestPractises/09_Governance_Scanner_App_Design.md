@@ -9,6 +9,17 @@
 
 ---
 
+> **📚 Source Classification Key** — Standards in this document are labelled:  
+> 🔵 **Zoho Official** — Directly verified from Zoho's official documentation or API specs  
+> 🟢 **FCI Internal** — FCI's own policy/convention (not mandated by Zoho; documented in `10_Sources_and_Validation.md`)  
+> 🟡 **Community** — Observed pattern from Zoho Community forums, partner blogs, or marketplace examples  
+> 🔴 **Unverified** — Stated in good faith; official source not yet confirmed — validate before enforcing  
+> ⚠️ **Correction** — Found to differ from official docs; see `10_Sources_and_Validation.md §3`
+>
+> _Full source citation table: [10_Sources_and_Validation.md](./10_Sources_and_Validation.md)_
+
+---
+
 ## Table of Contents
 
 1. [What This App Does](#1-what-this-app-does)
@@ -1773,3 +1784,18 @@ DEVELOPMENT (test org or sandbox)
 ---
 
 *End of Document — FCI_GovernanceScanner Design v1.0.0*
+
+---
+
+## 📚 Source Classification
+
+| Standard / Section | Source | Notes |
+|---|---|---|
+| Scanner app built in Zoho Creator | 🟢 FCI Internal | Design choice; Creator chosen for low-code flexibility and Deluge integration |
+| ~50 scan rules with regex patterns | 🟢 FCI Internal | Rules derived from FCI's own naming/coding standards |
+| Rule_Repository, Scan_Session, Scan_Finding forms | 🟢 FCI Internal | FCI data model design |
+| Zoho Creator API calls for scanning | 🔵 Zoho Official | Uses official Creator REST API — zoho.com/creator/help/ |
+| Dashboard widget SDK pattern | 🔵 Zoho Official | Official Zoho Creator widget SDK |
+| Deluge scanning functions | 🟢 FCI Internal | FCI-authored functions |
+| Module connection form for API credentials | 🟢 FCI Internal | FCI architecture pattern for multi-module scanning |
+| Seed data in CSV format | 🟢 FCI Internal | FCI deployment approach |

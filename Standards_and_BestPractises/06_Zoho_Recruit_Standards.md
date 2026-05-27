@@ -1,5 +1,14 @@
 # 06 — Zoho Recruit Standards & Best Practices
 
+> **📚 Source Classification Key** — Standards in this document are labelled:  
+> 🔵 **Zoho Official** — Directly verified from Zoho's official documentation or API specs  
+> 🟢 **FCI Internal** — FCI's own policy/convention (not mandated by Zoho; documented in `10_Sources_and_Validation.md`)  
+> 🟡 **Community** — Observed pattern from Zoho Community forums, partner blogs, or marketplace examples  
+> 🔴 **Unverified** — Stated in good faith; official source not yet confirmed — validate before enforcing  
+> ⚠️ **Correction** — Found to differ from official docs; see `10_Sources_and_Validation.md §3`
+>
+> _Full source citation table: [10_Sources_and_Validation.md](./10_Sources_and_Validation.md)_
+
 ## 1. Module Naming Conventions
 
 - Standard modules: use Zoho defaults (Job Openings, Candidates, Interviews, Offers)
@@ -96,3 +105,18 @@
 - Same API limits as CRM — see → [04_Zoho_CRM_Standards.md#crm-api-limits--best-practices]
 - Recruit API field names: verify in Recruit → Settings → Modules → Fields (different from CRM field names)
 - Integration with People (onboarding): use Zoho Flow or a Catalyst function — document the integration in WorkDrive
+
+---
+
+## 📚 Source Classification
+
+| Standard / Section | Source | Notes |
+|---|---|---|
+| RCT_ function prefix | 🟢 FCI Internal | Part of FCI module prefix system |
+| Hiring pipeline stage names | 🟢 FCI Internal | FCI-defined hiring funnel; Recruit allows custom stages |
+| Recruit developer guide URL | 🔵 Zoho Official | **Verified URL:** https://help.zoho.com/portal/kb/zoho-recruit/developer-guide (previous URL /recruit/developer-guide/ returns 404) |
+| Recruit API available in all editions | 🔵 Zoho Official | Verified from Zoho Recruit developer docs (V2 API) |
+| APPI/GDPR compliance for Japan candidates | 🟢 FCI Internal | FCI compliance policy; required by Japan operations |
+| Never auto-send offer letters without human review | 🟢 FCI Internal | FCI HR policy (not a platform constraint) |
+| Candidate data retention — purge after rejection | 🟢 FCI Internal | FCI GDPR/APPI alignment policy |
+| Field naming conventions for Recruit | 🟢 FCI Internal | FCI convention extending cross-module standards |

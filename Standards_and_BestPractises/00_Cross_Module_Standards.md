@@ -10,6 +10,15 @@
 > **Owner:** India Lead + Japan Counterpart (mini-CAB)  
 > **Applies To:** All Zoho modules — Creator, CRM, Catalyst, Sigma, People, Recruit, Forms, Analytics
 
+> **📚 Source Classification Key** — Standards in this document are labelled:  
+> 🔵 **Zoho Official** — Directly verified from Zoho's official documentation or API specs  
+> 🟢 **FCI Internal** — FCI's own policy/convention (not mandated by Zoho; documented in `10_Sources_and_Validation.md`)  
+> 🟡 **Community** — Observed pattern from Zoho Community forums, partner blogs, or marketplace examples  
+> 🔴 **Unverified** — Stated in good faith; official source not yet confirmed — validate before enforcing  
+> ⚠️ **Correction** — Found to differ from official docs; see `10_Sources_and_Validation.md §3`
+>
+> _Full source citation table: [10_Sources_and_Validation.md](./10_Sources_and_Validation.md)_
+
 ---
 
 ## Table of Contents
@@ -1454,6 +1463,29 @@ This document establishes the foundation. Module-specific standards extend these
 ---
 
 *End of 00 — Cross-Module Standards*
+
+---
+
+## 📚 Source Classification
+
+| Standard / Section | Source | Notes |
+|---|---|---|
+| Module abbreviation prefixes (CRT_, CRM_, CAT_, etc.) | 🟢 FCI Internal | Prefix system designed by FCI; Zoho has no mandated prefix standard |
+| Case conventions (PascalCase forms, camelCase vars, snake_case API, UPPER_SNAKE_CASE constants) | 🟡 Community | General programming conventions applied to Zoho; consistent with Zoho's own examples but not formally mandated |
+| API field names use UPPER_SNAKE_CASE | 🔵 Zoho Official | Zoho CRM API returns fields in this format — see developer.zoho.com/crm |
+| Verb-Noun function naming pattern | 🟢 FCI Internal | FCI design choice for readability |
+| Function header comment template | 🟢 FCI Internal | FCI standard; modelled on JavaDoc / JSDoc conventions |
+| Deluge try-catch error handling | 🔵 Zoho Official | Deluge supports try/catch — see zoho.com/deluge/help/ |
+| info() for logging | 🔵 Zoho Official | info() is the official Deluge logging function — zoho.com/deluge/help/ |
+| No PII in info() logs | 🟢 FCI Internal | FCI security policy (GDPR/APPI alignment) |
+| invokeurl with connection: parameter | 🔵 Zoho Official | Zoho Connections are the official OAuth mechanism — zoho.com/deluge/help/ |
+| Widget SDK pattern — ZOHO.embeddedApp.on("PageLoad") | 🔵 Zoho Official | Official Zoho Widget SDK — zoho.com/creator/help/ |
+| BEM CSS convention | 🟡 Community | Standard web convention; not Zoho-specific |
+| Security checklist (15 items) | 🟢 FCI Internal | Compiled from OWASP + Zoho security guidelines + FCI policy |
+| No hardcoded credentials rule | 🔵 Zoho Official | Zoho explicitly documents Connections for external auth; hardcoding violates Zoho Marketplace rules |
+| VAPT before customer-facing production | 🟢 FCI Internal | FCI policy; not a Zoho platform requirement |
+| Git branching model (main/develop/feature) | 🟢 FCI Internal | Gitflow adaptation for Zoho code; not Zoho-mandated |
+| mini-CAB change management process | 🟢 FCI Internal | FCI governance design; inspired by ITIL v4 Change Enablement |
 
 ---
 

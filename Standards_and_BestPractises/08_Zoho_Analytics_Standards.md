@@ -8,6 +8,17 @@
 
 ---
 
+> **📚 Source Classification Key** — Standards in this document are labelled:  
+> 🔵 **Zoho Official** — Directly verified from Zoho's official documentation or API specs  
+> 🟢 **FCI Internal** — FCI's own policy/convention (not mandated by Zoho; documented in `10_Sources_and_Validation.md`)  
+> 🟡 **Community** — Observed pattern from Zoho Community forums, partner blogs, or marketplace examples  
+> 🔴 **Unverified** — Stated in good faith; official source not yet confirmed — validate before enforcing  
+> ⚠️ **Correction** — Found to differ from official docs; see `10_Sources_and_Validation.md §3`
+>
+> _Full source citation table: [10_Sources_and_Validation.md](./10_Sources_and_Validation.md)_
+
+---
+
 ## Table of Contents
 
 1. [Workspace Naming](#1-workspace-naming)
@@ -679,3 +690,22 @@ Copy this header and fill it in at the top of every custom SQL query in Zoho Ana
 *Document owner: India Manager — Analytics & Reporting*
 *Last reviewed: 2026-05-25*
 *Next review due: 2027-01-01*
+
+---
+
+## 📚 Source Classification
+
+| Standard / Section | Source | Notes |
+|---|---|---|
+| 5 sub-query hard limit | 🔴 Unverified | Widely reported in Zoho community as a hard limit causing silent failure; **not confirmed in official Zoho Analytics documentation** — validate in your Analytics instance before enforcing |
+| Sub-query budget comment: `-- Sub-query budget: X/5` | 🟢 FCI Internal | FCI coding standard for Analytics SQL |
+| Report naming: [Module]_[Metric]_[TimeRange] | 🟢 FCI Internal | FCI naming convention |
+| Dashboard naming: [Audience]_[Domain]_Dashboard | 🟢 FCI Internal | FCI naming convention |
+| No SELECT * | 🟡 Community | Standard SQL best practice; applies universally |
+| All SQL keywords uppercase | 🟡 Community | SQL style convention; not Analytics-specific |
+| All aggregates aliased | 🟡 Community | SQL best practice for readable output |
+| CTE pattern preferred over nested sub-queries | 🟡 Community | SQL performance best practice; Zoho Analytics supports CTEs |
+| ANL_ prefix | 🟢 FCI Internal | Part of FCI module prefix system |
+| Analytics API documentation | 🔵 Zoho Official | **Verified URL:** https://www.zoho.com/analytics/api/ (working) |
+| Analytics help documentation | 🔵 Zoho Official | **Verified URL:** https://www.zoho.com/analytics/help/ (working) |
+| Role-based report access | 🔵 Zoho Official | Zoho Analytics natively supports workspace-level permissions |

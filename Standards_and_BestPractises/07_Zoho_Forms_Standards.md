@@ -6,6 +6,17 @@
 
 ---
 
+> **📚 Source Classification Key** — Standards in this document are labelled:  
+> 🔵 **Zoho Official** — Directly verified from Zoho's official documentation or API specs  
+> 🟢 **FCI Internal** — FCI's own policy/convention (not mandated by Zoho; documented in `10_Sources_and_Validation.md`)  
+> 🟡 **Community** — Observed pattern from Zoho Community forums, partner blogs, or marketplace examples  
+> 🔴 **Unverified** — Stated in good faith; official source not yet confirmed — validate before enforcing  
+> ⚠️ **Correction** — Found to differ from official docs; see `10_Sources_and_Validation.md §3`
+>
+> _Full source citation table: [10_Sources_and_Validation.md](./10_Sources_and_Validation.md)_
+
+---
+
 ## Table of Contents
 
 1. [Form Naming Conventions](#1-form-naming-conventions)
@@ -451,3 +462,18 @@ Approved by   : [Name, YYYY-MM-DD]
 *Document owner: India Manager — Systems & Forms*
 *Last reviewed: 2026-05-25*
 *Next review due: 2027-01-01*
+
+---
+
+## 📚 Source Classification
+
+| Standard / Section | Source | Notes |
+|---|---|---|
+| Form naming: [Purpose]_[Audience]_[Version] | 🟢 FCI Internal | FCI naming convention |
+| Integration naming: FRM_[FormName]_To_[Destination] | 🟢 FCI Internal | Part of FCI module prefix system |
+| CAPTCHA required on all public-facing forms | 🔵 Zoho Official | Zoho Forms provides CAPTCHA as a built-in security feature; FCI mandates its use |
+| FRM_ prefix | 🟢 FCI Internal | Part of FCI module prefix system |
+| Field validation rules | 🟢 FCI Internal | FCI quality policy; Forms supports validation natively |
+| Notification email naming | 🟢 FCI Internal | FCI convention for traceability |
+| No PII collection without privacy notice | 🟢 FCI Internal | FCI GDPR/APPI compliance policy |
+| Form versioning (_v1, _v2) | 🟢 FCI Internal | FCI document control standard |

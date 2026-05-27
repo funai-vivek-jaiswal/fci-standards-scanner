@@ -12,6 +12,11 @@ This documentation set defines the **coding standards, naming conventions, secur
 
 These standards apply to **every developer on every project**. Code review must verify compliance before any merge to production.
 
+> **📚 Source Transparency Notice**  
+> Each standards document now includes a **Source Classification** section at the end.  
+> Standards are labelled: 🔵 Zoho Official · 🟢 FCI Internal · 🟡 Community · 🔴 Unverified  
+> For complete source citations, corrections, and the 3-layer validation framework, see [10_Sources_and_Validation.md](./10_Sources_and_Validation.md).
+
 ---
 
 ## Document Index
@@ -27,6 +32,7 @@ These standards apply to **every developer on every project**. Code review must 
 | [06_Zoho_Recruit_Standards.md](06_Zoho_Recruit_Standards.md) | **Recruit** | Hiring Pipeline, Stages, Custom Functions, Data Privacy | ~98 |
 | [07_Zoho_Forms_Standards.md](07_Zoho_Forms_Standards.md) | **Forms** | Naming, Conditional Logic, Integrations, Security | ~453 |
 | [08_Zoho_Analytics_Standards.md](08_Zoho_Analytics_Standards.md) | **Analytics** | SQL Standards, 5 Sub-query Limit, Dashboards, Access | ~681 |
+| [10_Sources_and_Validation.md](./10_Sources_and_Validation.md) | Sources & Validation Appendix | All | Source labels, verified URLs, corrections, 3-layer validation framework |
 
 ---
 

@@ -5,6 +5,15 @@
 > **Owner:** FCI India Development Team
 > **Last Updated:** 2026-05-25
 
+> **📚 Source Classification Key** — Standards in this document are labelled:  
+> 🔵 **Zoho Official** — Directly verified from Zoho's official documentation or API specs  
+> 🟢 **FCI Internal** — FCI's own policy/convention (not mandated by Zoho; documented in `10_Sources_and_Validation.md`)  
+> 🟡 **Community** — Observed pattern from Zoho Community forums, partner blogs, or marketplace examples  
+> 🔴 **Unverified** — Stated in good faith; official source not yet confirmed — validate before enforcing  
+> ⚠️ **Correction** — Found to differ from official docs; see `10_Sources_and_Validation.md §3`
+>
+> _Full source citation table: [10_Sources_and_Validation.md](./10_Sources_and_Validation.md)_
+
 ---
 
 ## Table of Contents
@@ -712,5 +721,20 @@ for each project in allProjects
 - Implement client-side caching for reference data that does not change frequently (e.g., department list, status codes).
 
 ---
+
+---
+
+## 📚 Source Classification
+
+| Standard / Section | Source | Notes |
+|---|---|---|
+| Form naming — PascalCase | 🟢 FCI Internal | FCI convention; Zoho Creator has no enforced naming standard |
+| Workflow naming: [FormName]_[Trigger]_[Action] | 🟢 FCI Internal | FCI design choice for traceability |
+| Max 3 cascade lookup levels | 🟡 Community | Widely recommended in Zoho community to avoid performance issues; not an official hard limit |
+| Creator REST API — zoho.com/creator/help/ | 🔵 Zoho Official | Official Creator REST API documentation |
+| Creator JS API — ZOHO.Creator.API.getRecords | 🔵 Zoho Official | Official Zoho Creator JS API for widgets |
+| Deluge in Creator follows same standards as 00_Cross_Module | 🟢 FCI Internal | FCI policy to maintain consistency |
+| Creator environments (Development / Staging / Production) | 🔵 Zoho Official | Zoho Creator natively supports environment management |
+| Form field naming conventions | 🟢 FCI Internal | FCI naming design; Creator does not mandate field naming |
 
 *End of 02 — Zoho Creator Standards & Best Practices*
