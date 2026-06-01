@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scan Findings</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- Loading state -->
+    <div id="state-loading" class="state-loading">
+        <div class="skeleton skeleton--nav"></div>
+        <div class="skeleton skeleton--subheader"></div>
+        <div class="skeleton skeleton--toolbar"></div>
+        <div class="skeleton skeleton--row"></div>
+        <div class="skeleton skeleton--row"></div>
+        <div class="skeleton skeleton--row"></div>
+        <div class="skeleton skeleton--row"></div>
+        <div class="skeleton skeleton--row"></div>
+    </div>
+
+    <!-- Error state -->
+    <div id="state-error" class="state-error" hidden>
+        <div class="state-error__icon">⚠️</div>
+        <p class="state-error__msg">Could not load findings for this scan session.</p>
+        <button class="btn btn--ghost" onclick="history.back()">← Go Back</button>
+    </div>
+
+    <!-- Main content -->
+    <main id="state-main" class="main" hidden>
+
+        <!-- Top nav bar -->
+        <nav class="topnav">
+            <button class="btn btn--ghost btn--sm" id="btn-back" onclick="navigateBack()">
+                ← Back to Dashboard
+            </button>
+            <h1 class="topnav__title">Scan Findings</h1>
+            <button class="btn btn--ghost btn--sm" id="btn-export" onclick="exportCSV()">
+                ⬇ Export CSV
+            </button>
+        </nav>
+
+        <!-- Session subheader -->
+        <div class="subheader">
+            <span id="sub-scan-type" class="subheader__chip">Full Scan</span>
+            <span id="sub-start-time" class="subheader__meta">—</span>
+            <span class="subheader__sep">·</span>
+            <span id="sub-rules-checked" class="subheader__meta">— rules checked</span>
+            <span class="subheader__sep">·</span>
+            <span class="subheader__meta">Pass Rate:&nbsp;<strong id="sub-pass-rate">—</strong></span>
+        </div>
+
+        <!-- Filters toolbar -->
+        <div class="toolbar">
+            <select id="filter-module" class="toolbar__select" onchange="applyFilters()">
+                <option value="">All Modules</option>
+                <option value="CRM">CRM</option>
+                <option value="Creator">Creator</option>
+                <option value="People">People</option>
+                <option value="Analytics">Analytics</option>
+                <option value="Sigma">Sigma</option>
+                <option value="Recruit">Recruit</option>
+                <option value="Forms">Forms</option>
+                <option value="Catalyst">Catalyst</option>
+            </select>
+
+            <select id="filter-severity" class="toolbar__select" onchange="applyFilters()">
+                <option value="">All Severities</option>
+                <option value="CRITICAL">Critical</option>
+                <option value="HIGH">High</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="LOW">Low</option>
+            </select>
+
+            <select id="filter-status" class="toolbar__select" onchange="applyFilters()">
+                <option value="">All Statuses</option>
+                <option value="CRITICAL">CRITICAL</option>
+                <option value="FAIL">FAIL</option>
+                <option value="WARN">WARN</option>
+                <option value="PASS">PASS</option>
+            </select>
+
+            <div class="toolbar__search-wrap">
+                <input
+                    id="filter-search"
+                    type="text"
+                    class="toolbar__search"
+                    placeholder="🔍 Search rules, details…"
+                    oninput="applyFilters()"
+                />
+            </div>
+
+            <span id="count-label" class="toolbar__count">Showing — of —</span>
+        </div>
+
+        <!-- Findings table -->
+        <div class="table-wrap">
+            <table class="findings-table">
+                <thead>
+                    <tr>
+                        <th class="col-module">Module</th>
+                        <th class="col-rule">Rule</th>
+                        <th class="col-source">Source Record</th>
+                        <th class="col-detail">Finding Detail</th>
+                        <th class="col-sev">Severity</th>
+                        <th class="col-status">Status</th>
+                        <th class="col-arrow"></th>
+                    </tr>
+                </thead>
+                <tbody id="findings-tbody">
+                    <!-- Populated by app.js -->
+                </tbody>
+            </table>
+            <div id="empty-state" class="empty-state" hidden>
+                <p>No findings match the current filters.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

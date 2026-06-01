@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Finding Detail</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- Loading state -->
+    <div id="state-loading" class="state-loading">
+        <div class="skeleton skeleton--nav"></div>
+        <div class="skeleton skeleton--hero"></div>
+        <div class="skeleton skeleton--line"></div>
+        <div class="skeleton skeleton--line skeleton--line--short"></div>
+        <div class="skeleton skeleton--block"></div>
+        <div class="skeleton skeleton--block skeleton--block--tall"></div>
+    </div>
+
+    <!-- Error state -->
+    <div id="state-error" class="state-error" hidden>
+        <div class="state-error__icon">⚠️</div>
+        <p class="state-error__msg">Could not load the finding. It may have been deleted or the ID is invalid.</p>
+        <button class="btn btn--ghost" onclick="navigateBack()">← Back to Findings</button>
+    </div>
+
+    <!-- Main content -->
+    <main id="state-main" class="main" hidden>
+
+        <!-- Top navigation -->
+        <nav class="topnav">
+            <button class="btn btn--ghost btn--sm" onclick="navigateBack()">← Back to Findings</button>
+        </nav>
+
+        <!-- Hero card: severity + module + rule ID + finding text -->
+        <div class="hero-card" id="hero-card">
+            <div class="hero-card__top">
+                <div class="hero-card__badges">
+                    <span id="hero-severity-badge" class="badge">—</span>
+                    <span id="hero-module-chip" class="module-chip">—</span>
+                </div>
+                <div class="hero-card__rule-id">
+                    Rule:&nbsp;<span id="hero-rule-id" class="rule-id-pill">—</span>
+                </div>
+            </div>
+            <div class="hero-card__rule-name" id="hero-rule-name">—</div>
+            <div class="hero-card__finding-detail" id="hero-finding-detail">—</div>
+        </div>
+
+        <!-- Meta info strip -->
+        <div class="meta-strip">
+            <dl class="meta-list">
+                <div class="meta-item">
+                    <dt>Source Record</dt>
+                    <dd id="meta-source">—</dd>
+                </div>
+                <div class="meta-item">
+                    <dt>Standard Reference</dt>
+                    <dd id="meta-standard">—</dd>
+                </div>
+                <div class="meta-item">
+                    <dt>Detected</dt>
+                    <dd id="meta-detected">—</dd>
+                </div>
+                <div class="meta-item">
+                    <dt>Status</dt>
+                    <dd id="meta-status">—</dd>
+                </div>
+            </dl>
+        </div>
+
+        <!-- Remediation steps section -->
+        <section class="section">
+            <h2 class="section__title">
+                <span class="section__rule">──</span> Remediation Steps
+            </h2>
+            <ol id="remediation-steps-list" class="steps-list">
+                <!-- Populated by app.js -->
+            </ol>
+        </section>
+
+        <!-- Status + remediation action section -->
+        <section class="section" id="section-status">
+            <h2 class="section__title">
+                <span class="section__rule">──</span> Status
+            </h2>
+
+            <!-- Open / not yet remediated -->
+            <div id="panel-open" hidden>
+                <div class="status-open">
+                    <span class="status-open__dot"></span>
+                    <span class="status-open__text">Open (not yet remediated)</span>
+                </div>
+
+                <div class="remediation-form">
+                    <label class="form-label" for="notes-input">Remediation notes</label>
+                    <textarea
+                        id="notes-input"
+                        class="form-textarea"
+                        placeholder="Describe what you did to fix this finding…"
+                        rows="3"
+                    ></textarea>
+                    <div id="notes-error" class="form-error" hidden>Please add a note before marking as resolved.</div>
+
+                    <div class="form-actions">
+                        <button id="btn-resolve" class="btn btn--primary" onclick="markResolved()">
+                            <span id="btn-resolve-spinner" class="spinner spinner--sm" hidden></span>
+                            ✓ Mark as Resolved
+                        </button>
+                        <button id="btn-skip" class="btn btn--danger" onclick="markSkipped()">
+                            <span id="btn-skip-spinner" class="spinner spinner--sm" hidden></span>
+                            ⏭ Skip / Won't Fix
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Already remediated -->
+            <div id="panel-resolved" hidden>
+                <div class="resolved-banner">
+                    <span class="resolved-banner__icon">✅</span>
+                    <div class="resolved-banner__body">
+                        <div class="resolved-banner__headline">
+                            Resolved by <strong id="res-by">—</strong> on <strong id="res-date">—</strong>
+                        </div>
+                        <div class="resolved-banner__notes" id="res-notes"></div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,390 @@
+/* ── Reset & base ────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+    color: #1a1a2e;
+    background: #f8f9fc;
+    padding: 0;
+    min-height: 100vh;
+}
+
+[hidden] { display: none !important; }
+
+/* ── Skeleton loading ────────────────────────────────────────────── */
+.skeleton {
+    background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 8px;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+.skeleton--nav        { height: 44px; margin: 12px 16px; border-radius: 8px; }
+.skeleton--hero       { height: 100px; margin: 0 16px 12px; }
+.skeleton--line       { height: 16px; margin: 0 16px 8px; width: 85%; }
+.skeleton--line--short { width: 55%; }
+.skeleton--block      { height: 32px; margin: 0 16px 8px; }
+.skeleton--block--tall { height: 80px; }
+
+/* ── Shared button styles ────────────────────────────────────────── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.15s, transform 0.1s;
+}
+.btn:active { transform: scale(0.97); }
+.btn--primary { background: #4f46e5; color: #fff; }
+.btn--primary:hover { background: #4338ca; }
+.btn--ghost { background: transparent; color: #6b7280; border: 1px solid #d1d5db; }
+.btn--ghost:hover { background: #f3f4f6; }
+.btn--danger  { background: #fee2e2; color: #dc2626; }
+.btn--danger:hover  { background: #fecaca; }
+.btn--success { background: #d1fae5; color: #065f46; }
+.btn--sm { padding: 6px 12px; font-size: 12px; }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; pointer-events: none; }
+
+/* ── Severity + status badges ────────────────────────────────────── */
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.badge--critical    { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+.badge--high        { background: #ffedd5; color: #9a3412; border: 1px solid #fdba74; }
+.badge--medium      { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.badge--low         { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
+.badge--pass        { background: #d1fae5; color: #065f46; }
+.badge--fail        { background: #fee2e2; color: #991b1b; }
+.badge--warn        { background: #fef3c7; color: #92400e; }
+.badge--crit-status { background: #fee2e2; color: #7f1d1d; border: 1px solid #fca5a5; font-weight: 700; }
+
+/* ── Spinner ─────────────────────────────────────────────────────── */
+.spinner {
+    display: inline-block;
+    width: 24px; height: 24px;
+    border: 3px solid #e0e7ff;
+    border-top-color: #4f46e5;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+.spinner--sm { width: 14px; height: 14px; border-width: 2px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Top navigation ──────────────────────────────────────────────── */
+.topnav {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 10px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* ── Main layout ─────────────────────────────────────────────────── */
+.main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* ── Hero card ───────────────────────────────────────────────────── */
+.hero-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Status-based left border on hero card — set by JS */
+.hero-card--critical { border-left: 4px solid #dc2626; }
+.hero-card--fail     { border-left: 4px solid #ef4444; }
+.hero-card--warn     { border-left: 4px solid #f59e0b; }
+.hero-card--pass     { border-left: 4px solid #10b981; }
+
+.hero-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.hero-card__badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.hero-card__rule-id {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.module-chip {
+    display: inline-block;
+    background: #ede9fe;
+    color: #5b21b6;
+    border: 1px solid #c4b5fd;
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.rule-id-pill {
+    display: inline-block;
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #86efac;
+    border-radius: 6px;
+    padding: 1px 7px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: "SF Mono", "Fira Code", monospace;
+}
+
+.hero-card__rule-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a2e;
+    line-height: 1.35;
+}
+
+.hero-card__finding-detail {
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.55;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+/* ── Meta info strip ─────────────────────────────────────────────── */
+.meta-strip {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px 16px;
+}
+.meta-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px 20px;
+}
+.meta-item dt {
+    font-size: 10px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 3px;
+}
+.meta-item dd {
+    font-size: 12px;
+    color: #1a1a2e;
+    font-weight: 500;
+    word-break: break-word;
+}
+
+/* Standard reference badge */
+.std-ref-badge {
+    display: inline-block;
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-family: "SF Mono", "Fira Code", monospace;
+    font-weight: 500;
+}
+
+/* ── Sections ────────────────────────────────────────────────────── */
+.section {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.section__title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.section__rule { color: #d1d5db; font-weight: 400; }
+
+/* ── Remediation steps list ──────────────────────────────────────── */
+.steps-list {
+    list-style: none;
+    counter-reset: steps;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0;
+}
+.steps-list li {
+    counter-increment: steps;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.5;
+}
+.steps-list li::before {
+    content: counter(steps);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    background: #ede9fe;
+    color: #5b21b6;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+.steps-empty {
+    font-size: 12px;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+/* ── Open (not yet remediated) panel ────────────────────────────── */
+.status-open {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #fafafa;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+.status-open__dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #d1d5db;
+    flex-shrink: 0;
+}
+.status-open__text {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* ── Remediation form ────────────────────────────────────────────── */
+.remediation-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.form-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+}
+.form-textarea {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1a1a2e;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+    min-height: 70px;
+}
+.form-textarea:focus { border-color: #4f46e5; }
+.form-textarea.is-error { border-color: #ef4444; }
+
+.form-error {
+    font-size: 11px;
+    color: #dc2626;
+    font-weight: 500;
+}
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* ── Resolved banner ─────────────────────────────────────────────── */
+.resolved-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 10px;
+}
+.resolved-banner__icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+.resolved-banner__body {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.resolved-banner__headline {
+    font-size: 13px;
+    color: #065f46;
+    font-weight: 500;
+}
+.resolved-banner__headline strong {
+    color: #064e3b;
+    font-weight: 700;
+}
+.resolved-banner__notes {
+    font-size: 12px;
+    color: #065f46;
+    font-style: italic;
+    line-height: 1.45;
+}
+
+/* ── Error state ─────────────────────────────────────────────────── */
+.state-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 70px 24px;
+    text-align: center;
+}
+.state-error__icon { font-size: 40px; }
+.state-error__msg  { font-size: 14px; color: #374151; max-width: 340px; }

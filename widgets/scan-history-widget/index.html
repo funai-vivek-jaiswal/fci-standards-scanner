@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scan History</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- Loading state -->
+    <div id="state-loading">
+        <div class="skeleton skeleton--title"></div>
+        <div class="skeleton skeleton--bar"></div>
+        <div class="skeleton skeleton--table"></div>
+    </div>
+
+    <!-- Main content -->
+    <main id="state-main" hidden>
+
+        <div class="page-header">
+            <h1>Scan History</h1>
+            <button class="btn btn--primary" onclick="runNewScan()">+ Run New Scan</button>
+        </div>
+
+        <!-- Pass Rate Trend -->
+        <div class="trend-card">
+            <h2>Pass Rate Trend — Last 10 Scans</h2>
+            <div class="trend-chart-wrap" id="trend-chart-wrap">
+                <!-- SVG injected by app.js -->
+            </div>
+        </div>
+
+        <!-- Scan history table -->
+        <div class="table-card">
+            <table class="scan-table">
+                <thead>
+                    <tr>
+                        <th>Date &amp; Time</th>
+                        <th>Type</th>
+                        <th>Rules</th>
+                        <th>Pass</th>
+                        <th>Fail</th>
+                        <th>Rate</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="scan-table-body">
+                    <!-- Populated by app.js -->
+                </tbody>
+            </table>
+            <!-- Empty state shown inside table body if needed -->
+        </div>
+
+    </main>
+
+    <!-- Error state -->
+    <div id="state-error" hidden>
+        <div class="state-center">⚠️ Could not load scan history. Please try again.</div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

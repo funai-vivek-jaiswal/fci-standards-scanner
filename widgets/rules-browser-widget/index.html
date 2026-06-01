@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rules Browser</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- Page header -->
+    <header class="page-header">
+        <div class="header-left">
+            <h1 class="page-title">📋 Rules Repository</h1>
+            <p class="page-subtitle">Manage the 50+ scan rules used by the Governance Scanner</p>
+        </div>
+        <div class="header-right">
+            <button class="btn btn--ghost" onclick="refreshRules()">↺ Refresh</button>
+            <button class="btn btn--primary" onclick="seedRules()">+ Seed Default Rules</button>
+        </div>
+    </header>
+
+    <!-- Stats bar -->
+    <div class="stats-bar" id="stats-bar" hidden>
+        <div class="stat-chip stat-chip--total">
+            <span class="stat-chip__value" id="stat-total">—</span>
+            <span class="stat-chip__label">Total Rules</span>
+        </div>
+        <div class="stat-chip stat-chip--enabled">
+            <span class="stat-chip__value" id="stat-enabled">—</span>
+            <span class="stat-chip__label">Enabled</span>
+        </div>
+        <div class="stat-chip stat-chip--crit">
+            <span class="stat-chip__value" id="stat-critical">—</span>
+            <span class="stat-chip__label">Critical</span>
+        </div>
+        <div class="stat-chip stat-chip--high">
+            <span class="stat-chip__value" id="stat-high">—</span>
+            <span class="stat-chip__label">High</span>
+        </div>
+        <div class="stat-chip stat-chip--med">
+            <span class="stat-chip__value" id="stat-medium">—</span>
+            <span class="stat-chip__label">Medium</span>
+        </div>
+        <div class="stat-chip stat-chip--low">
+            <span class="stat-chip__value" id="stat-low">—</span>
+            <span class="stat-chip__label">Low</span>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar">
+        <select id="filter-module" class="select" onchange="applyFilters()">
+            <option value="">All Modules</option>
+            <option value="CRM">CRM</option>
+            <option value="Creator">Creator</option>
+            <option value="People">People</option>
+            <option value="Analytics">Analytics</option>
+            <option value="Sigma">Sigma</option>
+            <option value="Recruit">Recruit</option>
+            <option value="Forms">Forms</option>
+            <option value="Catalyst">Catalyst</option>
+            <option value="Cross-Module">Cross-Module</option>
+        </select>
+        <select id="filter-severity" class="select" onchange="applyFilters()">
+            <option value="">All Severities</option>
+            <option value="CRITICAL">Critical</option>
+            <option value="HIGH">High</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="LOW">Low</option>
+        </select>
+        <select id="filter-enabled" class="select" onchange="applyFilters()">
+            <option value="">All Status</option>
+            <option value="true">Enabled</option>
+            <option value="false">Disabled</option>
+        </select>
+        <input type="text" id="filter-search" class="search-input"
+               placeholder="Search rule name or ID…" oninput="applyFilters()" />
+        <span class="results-count" id="results-count"></span>
+    </div>
+
+    <!-- Loading skeleton -->
+    <div id="state-loading" class="skeleton-wrap">
+        <div class="skeleton skeleton--row"></div>
+        <div class="skeleton skeleton--row"></div>
+        <div class="skeleton skeleton--row"></div>
+        <div class="skeleton skeleton--row"></div>
+        <div class="skeleton skeleton--row"></div>
+    </div>
+
+    <!-- Rules table -->
+    <div id="state-main" hidden>
+        <table class="rules-table">
+            <thead>
+                <tr>
+                    <th class="col-id">Rule ID</th>
+                    <th class="col-module">Module</th>
+                    <th class="col-name">Rule Name</th>
+                    <th class="col-check">Check Type</th>
+                    <th class="col-sev">Severity</th>
+                    <th class="col-ref">Standard Ref.</th>
+                    <th class="col-toggle">Enabled</th>
+                </tr>
+            </thead>
+            <tbody id="rules-tbody"></tbody>
+        </table>
+    </div>
+
+    <!-- Empty state -->
+    <div id="state-empty" class="state-center" hidden>
+        <div style="font-size:40px;margin-bottom:12px">📭</div>
+        <p style="font-size:15px;font-weight:600;color:#374151;margin-bottom:6px">No rules found</p>
+        <p style="color:#9ca3af;margin-bottom:20px">Try clearing filters, or seed the default rules.</p>
+        <button class="btn btn--primary" onclick="seedRules()">+ Seed Default Rules</button>
+    </div>
+
+    <!-- Error state -->
+    <div id="state-error" class="state-center" hidden>
+        <div style="font-size:32px;margin-bottom:12px">⚠️</div>
+        <p>Could not load rules. Please check your connection.</p>
+        <button class="btn btn--ghost" style="margin-top:16px" onclick="refreshRules()">Try Again</button>
+    </div>
+
+    <!-- Seed modal overlay -->
+    <div id="seed-modal" class="modal-overlay" hidden>
+        <div class="modal-card">
+            <h2 class="modal-title">Seed Default Rules</h2>
+            <p class="modal-body">This will load all 50+ built-in FCI governance rules into the Rules Repository. Existing rules with the same Rule ID will not be overwritten.</p>
+            <div id="seed-status" hidden></div>
+            <div class="modal-actions">
+                <button class="btn btn--ghost" onclick="closeSeedModal()" id="btn-cancel-seed">Cancel</button>
+                <button class="btn btn--primary" onclick="confirmSeedRules()" id="btn-confirm-seed">✓ Seed Rules</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FCI Governance Scanner Setup</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="wizard" id="wizard">
+
+    <!-- ── Step progress indicator ─────────────────────────────────── -->
+    <nav class="stepper" id="stepper" aria-label="Wizard steps">
+        <div class="stepper-step active" id="step-indicator-1">
+            <div class="stepper-circle">1</div>
+            <span class="stepper-label">Welcome</span>
+        </div>
+        <div class="stepper-step future" id="step-indicator-2">
+            <div class="stepper-circle">2</div>
+            <span class="stepper-label">Connect</span>
+        </div>
+        <div class="stepper-step future" id="step-indicator-3">
+            <div class="stepper-circle">3</div>
+            <span class="stepper-label">Verify</span>
+        </div>
+        <div class="stepper-step future" id="step-indicator-4">
+            <div class="stepper-circle">4</div>
+            <span class="stepper-label">Done</span>
+        </div>
+    </nav>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         STEP 1 — Welcome
+    ═════════════════════════════════════════════════════════════════ -->
+    <div id="step-1" class="step-pane">
+        <span class="welcome-logo" role="img" aria-label="Shield">🛡️</span>
+        <h1 class="welcome-title">FCI Governance Scanner Setup</h1>
+        <p class="welcome-subtitle">Automated compliance checking for all Zoho modules</p>
+
+        <ul class="feature-list">
+            <li>
+                <span class="feature-check">✓</span>
+                Scans 8 Zoho modules against 50+ FCI standards
+            </li>
+            <li>
+                <span class="feature-check">✓</span>
+                Identifies naming violations, missing fields, and config gaps
+            </li>
+            <li>
+                <span class="feature-check">✓</span>
+                Prioritises findings: Critical → High → Medium → Low
+            </li>
+            <li>
+                <span class="feature-check">✓</span>
+                Tracks remediation and trends over time
+            </li>
+        </ul>
+
+        <div class="step-footer">
+            <button class="btn btn--primary" onclick="goToStep(2)">Get Started →</button>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         STEP 2 — Connections
+    ═════════════════════════════════════════════════════════════════ -->
+    <div id="step-2" class="step-pane" hidden>
+        <h2 class="step-title">Configure Module Connections</h2>
+        <p class="step-subtitle">
+            Each module needs a Zoho connection configured in Creator to scan its live data.
+        </p>
+
+        <table class="conn-table" id="conn-table">
+            <thead>
+                <tr>
+                    <th>Module</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="conn-table-body">
+                <!-- Populated by app.js -->
+            </tbody>
+        </table>
+
+        <div class="step-footer step-footer--space">
+            <button class="btn btn--ghost" onclick="goToStep(1)">← Back</button>
+            <button class="btn btn--primary" onclick="goToStep(3)">Next: Verify →</button>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         STEP 3 — Verify
+    ═════════════════════════════════════════════════════════════════ -->
+    <div id="step-3" class="step-pane" hidden>
+        <h2 class="step-title">Testing All Connections</h2>
+        <p class="step-subtitle">Running a quick connectivity test for each module.</p>
+
+        <ul class="verify-list" id="verify-list">
+            <!-- Populated by app.js -->
+        </ul>
+
+        <div class="verify-summary" id="verify-summary" hidden>
+            <!-- Populated by app.js -->
+        </div>
+
+        <div class="step-footer step-footer--space">
+            <button class="btn btn--ghost" onclick="goToStep(2)">← Back</button>
+            <button class="btn btn--primary" id="btn-next-scan" onclick="goToStep(4)" disabled>
+                Next: First Scan →
+            </button>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         STEP 4 — Complete
+    ═════════════════════════════════════════════════════════════════ -->
+    <div id="step-4" class="step-pane" hidden>
+        <span class="complete-icon" role="img" aria-label="Success">✅</span>
+        <h2 class="complete-title">Setup Complete!</h2>
+        <p class="complete-subtitle" id="complete-subtitle">Loading connection results…</p>
+
+        <!-- Seed Rules card -->
+        <div class="seed-card">
+            <p class="seed-card-title">Load Built-In Scan Rules</p>
+            <p class="seed-card-desc">
+                Load the 50+ built-in scan rules into the Rules Repository.
+                This only needs to be done once.
+            </p>
+            <button class="btn btn--success" id="btn-seed" onclick="seedRules()">
+                ✓ Seed Rules Now
+            </button>
+            <div id="seed-result" class="seed-result" hidden></div>
+        </div>
+
+        <!-- CTA buttons -->
+        <div class="cta-row">
+            <button class="btn btn--primary" onclick="navTo('Home')">🔍 Run First Scan</button>
+            <button class="btn btn--secondary" onclick="navTo('Home')">📊 Go to Dashboard</button>
+        </div>
+    </div>
+
+</div><!-- /.wizard -->
+
+<script src="app.js"></script>
+</body>
+</html>

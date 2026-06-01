@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FCI Governance Scanner — App Prototype</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════════════════ */
+:root {
+  --primary:   #4f46e5;
+  --primary-d: #4338ca;
+  --primary-l: #e0e7ff;
+  --success:   #10b981;
+  --danger:    #ef4444;
+  --warning:   #f59e0b;
+  --critical:  #dc2626;
+  --bg:        #f0f2f8;
+  --sidebar:   #1a1a2e;
+  --card:      #ffffff;
+  --border:    #e5e7eb;
+  --text-1:    #1a1a2e;
+  --text-2:    #374151;
+  --muted:     #6b7280;
+  --light:     #9ca3af;
+  --radius:    10px;
+  --shadow:    0 2px 12px rgba(0,0,0,0.07);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--text-1);
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+[hidden] { display: none !important; }
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ═══════════════════════════════════════════════════════════════
+   APP SHELL: SIDEBAR + MAIN
+═══════════════════════════════════════════════════════════════ */
+.sidebar {
+  width: 220px;
+  background: var(--sidebar);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.sidebar-logo-icon  { font-size: 22px; display: block; margin-bottom: 4px; }
+.sidebar-logo-name  { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.2; }
+.sidebar-logo-sub   { font-size: 10px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 1px; }
+
+.sidebar-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #4b5563;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 16px 18px 6px;
+}
+.sidebar-nav { list-style: none; }
+.sidebar-nav li a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  font-size: 13px;
+  color: #9ca3af;
+  text-decoration: none;
+  border-radius: 0;
+  transition: background 0.15s, color 0.15s;
+  cursor: pointer;
+}
+.sidebar-nav li a:hover { background: rgba(255,255,255,0.06); color: #e5e7eb; }
+.sidebar-nav li a.active { background: rgba(79,70,229,0.25); color: #a5b4fc; font-weight: 600; }
+.nav-icon { font-size: 15px; flex-shrink: 0; }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 14px 18px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  font-size: 11px;
+  color: #4b5563;
+}
+.sidebar-footer strong { color: #6b7280; display: block; margin-bottom: 2px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   MAIN CONTENT AREA
+═══════════════════════════════════════════════════════════════ */
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.topbar {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.topbar-breadcrumb { font-size: 13px; color: var(--muted); }
+.topbar-breadcrumb strong { color: var(--text-1); }
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.user-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--primary-l);
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.page-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCREEN PANELS (one per page)
+═══════════════════════════════════════════════════════════════ */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ═══════════════════════════════════════════════════════════════
+   SHARED COMPONENTS
+═══════════════════════════════════════════════════════════════ */
+.page-title { font-size: 18px; font-weight: 700; color: var(--text-1); margin-bottom: 4px; }
+.page-subtitle { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 8px; border: none;
+  cursor: pointer; font-size: 13px; font-weight: 600;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn:active { transform: scale(0.97); }
+.btn--primary  { background: var(--primary); color: #fff; }
+.btn--primary:hover { background: var(--primary-d); }
+.btn--secondary { background: var(--primary-l); color: var(--primary); }
+.btn--secondary:hover { background: #c7d2fe; }
+.btn--ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn--ghost:hover { background: #f3f4f6; }
+.btn--danger { background: #fee2e2; color: #dc2626; }
+.btn--success { background: #d1fae5; color: #065f46; }
+.btn--sm { padding: 5px 12px; font-size: 12px; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+
+.badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+.badge--critical { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+.badge--high     { background: #ffedd5; color: #9a3412; border: 1px solid #fdba74; }
+.badge--medium   { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.badge--low      { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
+.badge--pass     { background: #d1fae5; color: #065f46; }
+.badge--fail     { background: #fee2e2; color: #991b1b; }
+.badge--warn     { background: #fef3c7; color: #92400e; }
+.badge--info     { background: var(--primary-l); color: #3730a3; }
+.badge--grey     { background: #f3f4f6; color: #374151; }
+
+.rate-pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.rate-pill--green  { background: #d1fae5; color: #065f46; }
+.rate-pill--yellow { background: #fef3c7; color: #92400e; }
+.rate-pill--red    { background: #fee2e2; color: #991b1b; }
+
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 12px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  box-shadow: var(--shadow);
+}
+.stat-icon  { font-size: 18px; }
+.stat-value { font-size: 24px; font-weight: 800; }
+.stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.stat-card--pass { border-top: 3px solid var(--success); } .stat-card--pass .stat-value { color: #059669; }
+.stat-card--fail { border-top: 3px solid var(--danger);  } .stat-card--fail .stat-value { color: #dc2626; }
+.stat-card--warn { border-top: 3px solid var(--warning); } .stat-card--warn .stat-value { color: #d97706; }
+.stat-card--crit { border-top: 3px solid var(--critical);} .stat-card--crit .stat-value { color: #b91c1c; }
+
+.section-title { font-size: 13px; font-weight: 700; color: var(--text-2); margin-bottom: 10px; }
+
+.data-table {
+  width: 100%; border-collapse: collapse;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.data-table th {
+  background: #f9fafb; padding: 9px 12px;
+  text-align: left; font-size: 11px; font-weight: 600;
+  color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; font-size: 12px; color: var(--text-2); }
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover { background: #fafafa; cursor: pointer; }
+
+.progress-wrap { background: #e5e7eb; border-radius: 999px; height: 8px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #818cf8); border-radius: 999px; transition: width 0.4s; }
+
+.filter-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+.select, .search-input {
+  padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px;
+  font-size: 12px; color: var(--text-2); background: var(--card);
+}
+.search-input { flex: 1; min-width: 160px; }
+.select:focus, .search-input:focus { outline: 2px solid #a5b4fc; border-color: var(--primary); }
+
+/* ═══════════════════════════════════════════════════════════════
+   SCREEN 1 — DASHBOARD
+═══════════════════════════════════════════════════════════════ */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.overall-bar-wrap { background: #e5e7eb; border-radius: 999px; height: 12px; overflow: hidden; margin-bottom: 16px; }
+.overall-bar      { height: 100%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 999px; transition: width 0.6s; }
+
+.module-table { width: 100%; border-collapse: collapse; }
+.module-table th { font-size: 11px; color: var(--muted); text-transform: uppercase; padding: 6px 8px; border-bottom: 1px solid var(--border); text-align: left; }
+.module-table td { padding: 8px 8px; border-bottom: 1px solid #f3f4f6; font-size: 12px; }
+.module-table tbody tr:last-child td { border-bottom: none; }
+
+.pass-badge {
+  display: flex; flex-direction: column; align-items: center;
+  background: var(--card); border: 2px solid var(--primary);
+  border-radius: 12px; padding: 10px 16px; text-align: center;
+}
+.pass-badge__val { font-size: 28px; font-weight: 800; color: var(--primary); }
+.pass-badge__lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+.summary-header {
+  display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;
+}
+
+.critical-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.critical-item {
+  background: #fff5f5; border: 1px solid #fecaca; border-left: 3px solid #dc2626;
+  border-radius: 6px; padding: 8px 12px; font-size: 12px; line-height: 1.4;
+}
+.critical-item strong { color: #dc2626; }
+
+/* ═══════════════════════════════════════════════════════════════
+   SCREEN 2 — SCAN PAGE
+═══════════════════════════════════════════════════════════════ */
+.scan-hero { text-align: center; padding: 32px 20px 24px; }
+.scan-hero-icon { font-size: 56px; margin-bottom: 14px; }
+.scan-hero-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.scan-hero-sub { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+
+.scan-options { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.module-picker { display: flex; gap: 8px; align-items: center; }
+
+.scan-running { text-align: center; }
+.running-icon { font-size: 40px; margin-bottom: 12px; }
+.spinner {
+  display: inline-block; width: 32px; height: 32px;
+  border: 3px solid var(--primary-l); border-top-color: var(--primary);
+  border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.live-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin: 20px 0; }
+.live-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.live-val { font-size: 26px; font-weight: 800; }
+.live-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; }
+
+/* ═══════════════════════════════════════════════════════════════
+   SCREEN 3 — FINDINGS LIST
+═══════════════════════════════════════════════════════════════ */
+.findings-row { cursor: pointer; }
+.findings-row:hover { background: #f5f3ff !important; }
+.finding-detail-text { color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   SCREEN 4 — FINDING DETAIL
+═══════════════════════════════════════════════════════════════ */
+.finding-header {
+  display: flex; align-items: flex-start; gap: 14px; margin-bottom: 20px;
+}
+.finding-severity-block { flex-shrink: 0; }
+.finding-title { font-size: 16px; font-weight: 700; color: var(--text-1); margin-bottom: 6px; }
+.finding-meta  { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 3px; }
+
+.info-card {
+  background: #fafafa; border: 1px solid var(--border); border-radius: 8px;
+  padding: 14px 16px; margin-bottom: 16px;
+}
+.info-card-label { font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em; margin-bottom: 6px; }
+.info-card-val   { font-size: 13px; color: var(--text-2); }
+
+.remediation-steps { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.remediation-step {
+  display: flex; gap: 12px; align-items: flex-start;
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px;
+}
+.step-num {
+  background: var(--primary); color: #fff;
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
+}
+.step-text { font-size: 13px; color: var(--text-2); line-height: 1.5; }
+
+.status-resolved {
+  background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px;
+  padding: 14px 18px; display: flex; align-items: center; gap: 12px;
+}
+.resolve-form textarea {
+  width: 100%; border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 12px; font-size: 13px; font-family: inherit; resize: vertical;
+  min-height: 80px; margin-bottom: 12px;
+}
+.resolve-form textarea:focus { outline: 2px solid #a5b4fc; border-color: var(--primary); }
+.resolve-actions { display: flex; gap: 10px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   SCREEN 5 — SCAN HISTORY
+═══════════════════════════════════════════════════════════════ */
+.trend-card { margin-bottom: 20px; }
+.trend-title { font-size: 13px; font-weight: 600; color: var(--text-2); margin-bottom: 12px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   SCREEN 6 — SETUP WIZARD
+═══════════════════════════════════════════════════════════════ */
+.wizard-wrap { max-width: 680px; margin: 0 auto; }
+
+.step-indicator {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; margin-bottom: 32px;
+}
+.step-node {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; z-index: 1;
+}
+.step-circle {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  border: 2px solid var(--border); background: var(--card); color: var(--muted);
+  transition: all 0.2s;
+}
+.step-circle.done { background: var(--success); border-color: var(--success); color: #fff; }
+.step-circle.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.step-label { font-size: 10px; color: var(--muted); text-align: center; }
+.step-line { flex: 1; height: 2px; background: var(--border); margin: 0 6px; position: relative; top: -10px; }
+.step-line.done { background: var(--success); }
+
+.wizard-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 32px; box-shadow: var(--shadow); }
+.wizard-nav  { display: flex; justify-content: space-between; margin-top: 28px; }
+
+.feature-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
+.feature-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--text-2); }
+.feature-check { color: var(--success); font-size: 16px; flex-shrink: 0; }
+
+.connection-table { width: 100%; border-collapse: collapse; }
+.connection-table th { font-size: 11px; color: var(--muted); text-transform: uppercase; padding: 6px 10px; border-bottom: 1px solid var(--border); text-align: left; }
+.connection-table td { padding: 9px 10px; border-bottom: 1px solid #f3f4f6; font-size: 12px; }
+.conn-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+.conn-dot--green  { background: var(--success); }
+.conn-dot--grey   { background: #d1d5db; }
+.conn-dot--red    { background: var(--danger); }
+
+.verify-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f3f4f6; }
+.verify-mod  { width: 100px; font-weight: 600; font-size: 13px; }
+.verify-bar  { flex: 1; background: #e5e7eb; border-radius: 999px; height: 8px; overflow: hidden; }
+.verify-fill { height: 100%; border-radius: 999px; background: var(--primary); width: 0%; transition: width 1.2s ease; }
+.verify-status { width: 100px; font-size: 13px; text-align: right; }
+
+/* ═══════════════════════════════════════════════════════════════
+   SCREEN 7 — RULES BROWSER
+═══════════════════════════════════════════════════════════════ */
+.stats-bar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.stat-chip {
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  padding: 8px 14px; display: flex; flex-direction: column; align-items: center; min-width: 68px;
+}
+.stat-chip__val { font-size: 18px; font-weight: 800; }
+.stat-chip__lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.chip--total  { border-top: 3px solid #9ca3af; } .chip--total  .stat-chip__val { color: #374151; }
+.chip--enabled{ border-top: 3px solid var(--success); } .chip--enabled .stat-chip__val { color: #059669; }
+.chip--crit   { border-top: 3px solid var(--critical); }.chip--crit .stat-chip__val { color: var(--critical); }
+.chip--high   { border-top: 3px solid #ea580c; }.chip--high .stat-chip__val { color: #ea580c; }
+.chip--med    { border-top: 3px solid var(--warning); }.chip--med .stat-chip__val { color: #d97706; }
+.chip--low    { border-top: 3px solid var(--success); }.chip--low .stat-chip__val { color: #059669; }
+
+.rule-id   { font-family: monospace; font-size: 11px; background: #f3f4f6; border-radius: 4px; padding: 1px 5px; }
+.toggle { display: inline-flex; cursor: pointer; }
+.toggle__input  { display: none; }
+.toggle__track  {
+  width: 36px; height: 20px; background: #d1d5db; border-radius: 999px;
+  position: relative; transition: background 0.2s;
+}
+.toggle__track::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; background: #fff; border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform 0.2s;
+}
+.toggle__input:checked + .toggle__track { background: var(--primary); }
+.toggle__input:checked + .toggle__track::after { transform: translateX(16px); }
+
+/* ═══════════════════════════════════════════════════════════════
+   PROTOTYPE NOTICE BANNER
+═══════════════════════════════════════════════════════════════ */
+.proto-banner {
+  background: #1a1a2e; color: #a5b4fc;
+  font-size: 11px; text-align: center;
+  padding: 5px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+</style>
+</head>
+<body>
+
+<!-- PROTOTYPE NOTICE -->
+<div style="position:fixed;top:0;left:0;right:0;z-index:999;background:#312e81;color:#c7d2fe;font-size:11px;text-align:center;padding:4px;">
+  🔬 Interactive Prototype — Simulated data only. Deploy actual widgets to Zoho Creator for live data.
+  <button onclick="this.parentElement.hidden=true" style="background:none;border:none;color:#818cf8;cursor:pointer;margin-left:8px;font-size:12px;">✕</button>
+</div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" style="margin-top:26px">
+  <div class="sidebar-logo">
+    <span class="sidebar-logo-icon">🛡️</span>
+    <span class="sidebar-logo-name">Governance<br>Scanner</span>
+    <span class="sidebar-logo-sub">FCI · Zoho Platform</span>
+  </div>
+
+  <span class="sidebar-section-label">Main</span>
+  <ul class="sidebar-nav">
+    <li><a href="#" onclick="nav('dashboard')" id="nav-dashboard" class="active">
+      <span class="nav-icon">📊</span> Dashboard
+    </a></li>
+    <li><a href="#" onclick="nav('scan')" id="nav-scan">
+      <span class="nav-icon">🔍</span> Run Scan
+    </a></li>
+  </ul>
+
+  <span class="sidebar-section-label">Results</span>
+  <ul class="sidebar-nav">
+    <li><a href="#" onclick="nav('findings')" id="nav-findings">
+      <span class="nav-icon">📋</span> Findings
+    </a></li>
+    <li><a href="#" onclick="nav('history')" id="nav-history">
+      <span class="nav-icon">🕐</span> Scan History
+    </a></li>
+  </ul>
+
+  <span class="sidebar-section-label">Admin</span>
+  <ul class="sidebar-nav">
+    <li><a href="#" onclick="nav('rules')" id="nav-rules">
+      <span class="nav-icon">📝</span> Rules
+    </a></li>
+    <li><a href="#" onclick="nav('setup')" id="nav-setup">
+      <span class="nav-icon">⚙️</span> Setup
+    </a></li>
+  </ul>
+
+  <div class="sidebar-footer">
+    <strong>j-vivek@funaiconsulting.in</strong>
+    India Tech Lead
+  </div>
+</nav>
+
+<!-- MAIN AREA -->
+<div class="main-area" style="margin-top:26px">
+  <div class="topbar">
+    <div class="topbar-breadcrumb" id="breadcrumb">
+      FCI Governance Scanner › <strong>Dashboard</strong>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn--secondary btn--sm" onclick="nav('scan')">🔍 New Scan</button>
+      <div class="topbar-user">
+        <div class="user-avatar">VJ</div>
+        <span>Vivek J.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 1: DASHBOARD
+══════════════════════════════════════════════════ -->
+<div id="screen-dashboard" class="screen active">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+    <div>
+      <h1 class="page-title">Compliance Overview</h1>
+      <p style="font-size:11px;color:var(--muted)">Last scan: 27 May 2026 · Full Scan · 48 rules</p>
+    </div>
+    <div class="pass-badge">
+      <span class="pass-badge__val">83%</span>
+      <span class="pass-badge__lbl">Pass Rate</span>
+    </div>
+  </div>
+
+  <div class="overall-bar-wrap" style="margin-bottom:18px">
+    <div class="overall-bar" style="width:83%"></div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card stat-card--pass"><span class="stat-icon">✅</span><span class="stat-value">40</span><span class="stat-label">Passed</span></div>
+    <div class="stat-card stat-card--fail"><span class="stat-icon">❌</span><span class="stat-value">5</span><span class="stat-label">Failed</span></div>
+    <div class="stat-card stat-card--warn"><span class="stat-icon">⚠️</span><span class="stat-value">3</span><span class="stat-label">Warnings</span></div>
+    <div class="stat-card stat-card--crit"><span class="stat-icon">🔴</span><span class="stat-value">2</span><span class="stat-label">Critical</span></div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="card">
+      <div class="section-title">By Module</div>
+      <table class="module-table">
+        <thead><tr><th>Module</th><th>Pass</th><th>Fail</th><th>Crit</th><th>Rate</th></tr></thead>
+        <tbody>
+          <tr><td><strong>CRM</strong></td><td style="color:#059669">10</td><td style="color:#dc2626">2</td><td style="color:#b91c1c;font-weight:700">1</td><td><span class="rate-pill rate-pill--yellow">83%</span></td></tr>
+          <tr><td><strong>People</strong></td><td style="color:#059669">7</td><td style="color:#dc2626">1</td><td style="color:#b91c1c;font-weight:700">—</td><td><span class="rate-pill rate-pill--yellow">88%</span></td></tr>
+          <tr><td><strong>Creator</strong></td><td style="color:#059669">6</td><td style="color:#dc2626">0</td><td>—</td><td><span class="rate-pill rate-pill--green">100%</span></td></tr>
+          <tr><td><strong>Analytics</strong></td><td style="color:#059669">5</td><td style="color:#dc2626">1</td><td style="color:#b91c1c;font-weight:700">1</td><td><span class="rate-pill rate-pill--yellow">83%</span></td></tr>
+          <tr><td><strong>Sigma</strong></td><td style="color:#059669">4</td><td style="color:#dc2626">1</td><td>—</td><td><span class="rate-pill rate-pill--yellow">80%</span></td></tr>
+          <tr><td><strong>Recruit</strong></td><td style="color:#059669">4</td><td style="color:#dc2626">0</td><td>—</td><td><span class="rate-pill rate-pill--green">100%</span></td></tr>
+          <tr><td><strong>Forms</strong></td><td style="color:#059669">4</td><td style="color:#dc2626">0</td><td>—</td><td><span class="rate-pill rate-pill--green">100%</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="section-title">🔴 Open Critical Findings</div>
+      <ul class="critical-list">
+        <li class="critical-item"><strong>CRM</strong> · Field API name "lead_src" violates UPPER_SNAKE_CASE convention (Rule CRM-004)</li>
+        <li class="critical-item"><strong>Analytics</strong> · Report "Sales_Summary" has no row-level security enabled (Rule ANL-002)</li>
+      </ul>
+      <div style="margin-top:12px">
+        <button class="btn btn--danger btn--sm" onclick="nav('findings')">View all findings →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:0">
+    <div class="section-title">Quick Actions</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn--primary" onclick="nav('scan')">🔍 Run New Scan</button>
+      <button class="btn btn--secondary" onclick="nav('findings')">📋 View Findings</button>
+      <button class="btn btn--ghost" onclick="nav('history')">🕐 Scan History</button>
+      <button class="btn btn--ghost" onclick="nav('rules')">📝 Browse Rules</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 2: RUN SCAN
+══════════════════════════════════════════════════ -->
+<div id="screen-scan" class="screen">
+  <!-- Idle state -->
+  <div id="scan-idle">
+    <div class="scan-hero">
+      <div class="scan-hero-icon">🔍</div>
+      <h2 class="scan-hero-title">Governance Scanner</h2>
+      <p class="scan-hero-sub">Check all FCI Zoho standards against live configuration data</p>
+      <div class="scan-options">
+        <button class="btn btn--primary" style="font-size:15px;padding:12px 28px" onclick="startScan()">
+          🔍 Run Full Scan (All 8 Modules)
+        </button>
+        <div class="module-picker">
+          <select class="select" id="scan-module-select">
+            <option value="">Or scan a single module…</option>
+            <option>CRM</option><option>People</option><option>Creator</option>
+            <option>Analytics</option><option>Sigma</option><option>Recruit</option>
+            <option>Forms</option><option>Catalyst</option>
+          </select>
+          <button class="btn btn--secondary" onclick="startScan()">Scan →</button>
+        </div>
+      </div>
+      <p style="margin-top:18px;font-size:12px;color:var(--muted)">Last scan: 27 May 2026 · Pass rate: 83%</p>
+    </div>
+  </div>
+
+  <!-- Running state -->
+  <div id="scan-running" hidden>
+    <div class="card scan-running" style="max-width:540px;margin:0 auto;text-align:center;padding:36px">
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:20px">
+        <div class="spinner"></div>
+        <h2 style="font-size:18px;font-weight:700">Scan in Progress…</h2>
+      </div>
+      <div class="progress-wrap" style="margin-bottom:8px">
+        <div class="progress-fill" id="scan-progress-bar" style="width:0%"></div>
+      </div>
+      <p id="scan-progress-label" style="font-size:12px;color:var(--muted);margin-bottom:20px">Initialising…</p>
+      <div class="live-grid">
+        <div class="live-card" style="border-top:3px solid #10b981"><span class="live-val" id="lv-pass" style="color:#059669">0</span><span class="live-lbl">Passed</span></div>
+        <div class="live-card" style="border-top:3px solid #ef4444"><span class="live-val" id="lv-fail" style="color:#dc2626">0</span><span class="live-lbl">Failed</span></div>
+        <div class="live-card" style="border-top:3px solid #f59e0b"><span class="live-val" id="lv-warn" style="color:#d97706">0</span><span class="live-lbl">Warned</span></div>
+        <div class="live-card" style="border-top:3px solid #dc2626"><span class="live-val" id="lv-crit" style="color:#b91c1c">0</span><span class="live-lbl">Critical</span></div>
+      </div>
+      <p style="font-size:12px;color:var(--light)" id="scan-eta">Estimating time…</p>
+    </div>
+  </div>
+
+  <!-- Done state -->
+  <div id="scan-done" hidden>
+    <div class="card" style="max-width:540px;margin:0 auto;text-align:center;padding:36px">
+      <div style="font-size:56px;margin-bottom:12px" id="done-icon">⚠️</div>
+      <h2 style="font-size:20px;font-weight:700;margin-bottom:6px;color:#d97706" id="done-title">Scan Complete — Issues Found</h2>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:24px 0">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+          <span style="font-size:28px;font-weight:800;color:#059669">40</span>
+          <span style="font-size:11px;color:var(--muted);text-transform:uppercase">Passed</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+          <span style="font-size:28px;font-weight:800;color:#dc2626">5</span>
+          <span style="font-size:11px;color:var(--muted);text-transform:uppercase">Failed</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+          <span style="font-size:28px;font-weight:800;color:#d97706">3</span>
+          <span style="font-size:11px;color:var(--muted);text-transform:uppercase">Warned</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+          <span style="font-size:28px;font-weight:800;color:#4f46e5">83%</span>
+          <span style="font-size:11px;color:var(--muted);text-transform:uppercase">Pass Rate</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button class="btn btn--primary" onclick="nav('findings')">View Findings →</button>
+        <button class="btn btn--ghost" onclick="resetScan()">Run Another Scan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 3: FINDINGS LIST
+══════════════════════════════════════════════════ -->
+<div id="screen-findings" class="screen">
+  <h1 class="page-title">Scan Findings</h1>
+  <p style="font-size:11px;color:var(--muted);margin-bottom:14px">Full Scan · 27 May 2026 · 48 rules checked · Pass Rate: 83%
+    <button class="btn btn--ghost btn--sm" style="margin-left:8px">⬇ Export CSV</button>
+  </p>
+
+  <div class="filter-bar">
+    <select class="select"><option>All Modules</option><option>CRM</option><option>Analytics</option><option>People</option></select>
+    <select class="select"><option>All Severities</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select>
+    <select class="select"><option>All Statuses</option><option>Failed</option><option>Warning</option><option>Passed</option></select>
+    <input type="text" class="search-input" placeholder="Search findings…" />
+    <span style="font-size:12px;color:var(--muted)">Showing 8 of 48</span>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Module</th><th>Rule</th><th>Finding Detail</th><th>Severity</th><th>Status</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="findings-row" style="border-left:3px solid #dc2626" onclick="nav('findingDetail')">
+        <td><strong>CRM</strong></td>
+        <td><code style="font-family:monospace;font-size:11px;background:#f3f4f6;padding:1px 5px;border-radius:3px">CRM-004</code></td>
+        <td>
+          <div>Field API name "lead_src" violates UPPER_SNAKE_CASE</div>
+          <div class="finding-detail-text">Expected: Lead_Source_Detail · Found: lead_src</div>
+        </td>
+        <td><span class="badge badge--critical">CRITICAL</span></td>
+        <td><span class="badge badge--fail">FAIL</span></td>
+        <td><button class="btn btn--ghost btn--sm" onclick="event.stopPropagation();nav('findingDetail')">View →</button></td>
+      </tr>
+      <tr class="findings-row" style="border-left:3px solid #dc2626" onclick="nav('findingDetail')">
+        <td><strong>Analytics</strong></td>
+        <td><code style="font-family:monospace;font-size:11px;background:#f3f4f6;padding:1px 5px;border-radius:3px">ANL-002</code></td>
+        <td>
+          <div>Report "Sales_Summary" has no row-level security</div>
+          <div class="finding-detail-text">All users can see all rows — must restrict by org/role</div>
+        </td>
+        <td><span class="badge badge--critical">CRITICAL</span></td>
+        <td><span class="badge badge--fail">FAIL</span></td>
+        <td><button class="btn btn--ghost btn--sm" onclick="event.stopPropagation();nav('findingDetail')">View →</button></td>
+      </tr>
+      <tr class="findings-row" style="border-left:3px solid #ef4444">
+        <td><strong>People</strong></td>
+        <td><code style="font-family:monospace;font-size:11px;background:#f3f4f6;padding:1px 5px;border-radius:3px">PEO-003</code></td>
+        <td>
+          <div>Leave type "casual_leave" not using PascalCase</div>
+          <div class="finding-detail-text">Expected: CasualLeave · API name: casual_leave</div>
+        </td>
+        <td><span class="badge badge--high">HIGH</span></td>
+        <td><span class="badge badge--fail">FAIL</span></td>
+        <td><button class="btn btn--ghost btn--sm">View →</button></td>
+      </tr>
+      <tr class="findings-row" style="border-left:3px solid #f59e0b">
+        <td><strong>CRM</strong></td>
+        <td><code style="font-family:monospace;font-size:11px;background:#f3f4f6;padding:1px 5px;border-radius:3px">CRM-011</code></td>
+        <td>
+          <div>Blueprint "Deal_Approval_BP" has 18 states (max recommended: 15)</div>
+          <div class="finding-detail-text">Consider splitting into two blueprints</div>
+        </td>
+        <td><span class="badge badge--medium">MEDIUM</span></td>
+        <td><span class="badge badge--warn">WARN</span></td>
+        <td><button class="btn btn--ghost btn--sm">View →</button></td>
+      </tr>
+      <tr class="findings-row" style="border-left:3px solid #f59e0b">
+        <td><strong>Sigma</strong></td>
+        <td><code style="font-family:monospace;font-size:11px;background:#f3f4f6;padding:1px 5px;border-radius:3px">SGM-005</code></td>
+        <td>
+          <div>Widget "Dashboard_v2" missing function header comment</div>
+          <div class="finding-detail-text">All Sigma widgets must include module/purpose header</div>
+        </td>
+        <td><span class="badge badge--medium">MEDIUM</span></td>
+        <td><span class="badge badge--warn">WARN</span></td>
+        <td><button class="btn btn--ghost btn--sm">View →</button></td>
+      </tr>
+      <tr class="findings-row" style="border-left:3px solid #10b981">
+        <td><strong>Creator</strong></td>
+        <td><code style="font-family:monospace;font-size:11px;background:#f3f4f6;padding:1px 5px;border-radius:3px">CRT-001</code></td>
+        <td>
+          <div>Form naming convention — all forms use correct prefix</div>
+          <div class="finding-detail-text">CRT_ScanSession, CRT_ScanFinding, CRT_RuleRepository — all compliant</div>
+        </td>
+        <td><span class="badge badge--low">LOW</span></td>
+        <td><span class="badge badge--pass">PASS</span></td>
+        <td><button class="btn btn--ghost btn--sm">View →</button></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 4: FINDING DETAIL
+══════════════════════════════════════════════════ -->
+<div id="screen-findingDetail" class="screen">
+  <div style="margin-bottom:16px">
+    <button class="btn btn--ghost btn--sm" onclick="nav('findings')">← Back to Findings</button>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="finding-header">
+      <div class="finding-severity-block">
+        <span class="badge badge--critical" style="font-size:13px;padding:5px 14px">CRITICAL</span>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:4px">CRM · Rule CRM-004</div>
+        <h2 class="finding-title">Field API name violates naming convention</h2>
+        <div class="finding-meta">
+          <span>📁 Source Record: Account "Acme Corp" (ID: 3829481923)</span>
+          <span>📄 Standard: 04_Zoho_CRM_Standards.md §2</span>
+          <span>🕐 Detected: 27 May 2026 14:32</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-card-label">Finding Detail</div>
+      <div class="info-card-val">
+        Field with display name "Lead Source Detail" has API name <code style="background:#f3f4f6;padding:1px 5px;border-radius:3px">lead_src</code>
+        which violates the UPPER_SNAKE_CASE convention.
+        Expected API name: <code style="background:#f3f4f6;padding:1px 5px;border-radius:3px">Lead_Source_Detail</code>.
+        API field names are permanent once created — this requires delete and recreate with data migration.
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="section-title">🔧 Remediation Steps</div>
+    <ol class="remediation-steps">
+      <li class="remediation-step">
+        <span class="step-num">1</span>
+        <span class="step-text">Go to <strong>CRM → Settings → Modules → Leads → Fields</strong> and locate the field with display name "Lead Source Detail"</span>
+      </li>
+      <li class="remediation-step">
+        <span class="step-num">2</span>
+        <span class="step-text">Note: <strong>API field names cannot be changed</strong> in Zoho CRM — you must delete and recreate the field</span>
+      </li>
+      <li class="remediation-step">
+        <span class="step-num">3</span>
+        <span class="step-text">Export all current values for this field using <strong>Data Export → Leads</strong> before deleting</span>
+      </li>
+      <li class="remediation-step">
+        <span class="step-num">4</span>
+        <span class="step-text">Create a new field with API name <code style="background:#f3f4f6;padding:1px 4px;border-radius:3px">Lead_Source_Detail</code> and display name "Lead Source Detail"</span>
+      </li>
+      <li class="remediation-step">
+        <span class="step-num">5</span>
+        <span class="step-text">Write a standalone function <code style="background:#f3f4f6;padding:1px 4px;border-radius:3px">CRM_MigrateLeadSrc_standalone</code> to copy old values to the new field</span>
+      </li>
+      <li class="remediation-step">
+        <span class="step-num">6</span>
+        <span class="step-text">Delete the old <code style="background:#f3f4f6;padding:1px 4px;border-radius:3px">lead_src</code> field and re-run the scan to verify</span>
+      </li>
+    </ol>
+  </div>
+
+  <div class="card" id="resolve-section">
+    <div class="section-title">📌 Status</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">
+      <span style="display:inline-block;width:10px;height:10px;background:#ef4444;border-radius:50%;margin-right:6px"></span>
+      Open — not yet remediated
+    </p>
+    <div class="resolve-form">
+      <label style="font-size:12px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px">
+        Remediation notes <span style="color:var(--danger)">*</span>
+      </label>
+      <textarea placeholder="Describe what you did to fix this issue…" id="resolve-notes"></textarea>
+      <div class="resolve-actions">
+        <button class="btn btn--success" onclick="markResolved()">✓ Mark as Resolved</button>
+        <button class="btn btn--ghost" onclick="markWontFix()">⏭ Skip / Won't Fix</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resolved state (hidden initially) -->
+  <div class="card" id="resolved-banner" hidden>
+    <div class="status-resolved">
+      <span style="font-size:28px">✅</span>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#065f46">Resolved</div>
+        <div style="font-size:12px;color:#047857;margin-top:2px">
+          By j-vivek@funaiconsulting.in · 27 May 2026 15:45
+        </div>
+        <div style="font-size:12px;color:#374151;margin-top:4px" id="resolved-notes-display"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 5: SCAN HISTORY
+══════════════════════════════════════════════════ -->
+<div id="screen-history" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+    <div>
+      <h1 class="page-title">Scan History</h1>
+      <p class="page-subtitle">10 scans recorded · Pass rate trending ↑</p>
+    </div>
+    <button class="btn btn--primary" onclick="nav('scan')">+ Run New Scan</button>
+  </div>
+
+  <!-- Trend chart -->
+  <div class="card trend-card">
+    <div class="trend-title">Pass Rate Trend — Last 10 Scans</div>
+    <svg viewBox="0 0 500 130" style="width:100%;display:block" xmlns="http://www.w3.org/2000/svg">
+      <!-- Grid lines -->
+      <line x1="40" y1="10"  x2="490" y2="10"  stroke="#f3f4f6" stroke-width="1"/>
+      <line x1="40" y1="37"  x2="490" y2="37"  stroke="#f3f4f6" stroke-width="1"/>
+      <line x1="40" y1="64"  x2="490" y2="64"  stroke="#f3f4f6" stroke-width="1"/>
+      <line x1="40" y1="91"  x2="490" y2="91"  stroke="#f3f4f6" stroke-width="1"/>
+      <line x1="40" y1="110" x2="490" y2="110" stroke="#e5e7eb" stroke-width="1"/>
+      <!-- Y labels -->
+      <text x="36" y="13"  font-size="9" fill="#9ca3af" text-anchor="end">100%</text>
+      <text x="36" y="40"  font-size="9" fill="#9ca3af" text-anchor="end">75%</text>
+      <text x="36" y="67"  font-size="9" fill="#9ca3af" text-anchor="end">50%</text>
+      <text x="36" y="94"  font-size="9" fill="#9ca3af" text-anchor="end">25%</text>
+      <text x="36" y="113" font-size="9" fill="#9ca3af" text-anchor="end">0%</text>
+      <!-- Line: pass rates 58,63,67,71,75,78,80,82,83,83 mapped to y: 10+((100-v)/100)*100 -->
+      <polyline
+        points="42,59 90,48 138,42 186,37 234,33 282,30 330,27 378,24 426,22 474,22"
+        fill="none" stroke="#4f46e5" stroke-width="2" stroke-linejoin="round"/>
+      <!-- Points with tooltips -->
+      <circle cx="42"  cy="59" r="4" fill="#fff" stroke="#4f46e5" stroke-width="2"><title>10 May · 58%</title></circle>
+      <circle cx="90"  cy="48" r="4" fill="#fff" stroke="#4f46e5" stroke-width="2"><title>12 May · 63%</title></circle>
+      <circle cx="138" cy="42" r="4" fill="#fff" stroke="#4f46e5" stroke-width="2"><title>14 May · 67%</title></circle>
+      <circle cx="186" cy="37" r="4" fill="#fff" stroke="#4f46e5" stroke-width="2"><title>16 May · 71%</title></circle>
+      <circle cx="234" cy="33" r="4" fill="#fff" stroke="#4f46e5" stroke-width="2"><title>18 May · 75%</title></circle>
+      <circle cx="282" cy="30" r="4" fill="#fff" stroke="#4f46e5" stroke-width="2"><title>20 May · 78%</title></circle>
+      <circle cx="330" cy="27" r="4" fill="#fff" stroke="#4f46e5" stroke-width="2"><title>22 May · 80%</title></circle>
+      <circle cx="378" cy="24" r="4" fill="#fff" stroke="#4f46e5" stroke-width="2"><title>24 May · 82%</title></circle>
+      <circle cx="426" cy="22" r="4" fill="#fff" stroke="#4f46e5" stroke-width="2"><title>26 May · 83%</title></circle>
+      <circle cx="474" cy="22" r="5" fill="#4f46e5" stroke="#4f46e5" stroke-width="2"><title>27 May · 83%</title></circle>
+      <!-- Latest label -->
+      <text x="474" y="16" font-size="9" fill="#4f46e5" text-anchor="middle" font-weight="700">83%</text>
+    </svg>
+  </div>
+
+  <!-- History table -->
+  <table class="data-table">
+    <thead>
+      <tr><th>Date &amp; Time</th><th>Type</th><th>Rules</th><th>Pass</th><th>Fail</th><th>Rate</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>27 May 2026 14:32</td>
+        <td><span class="badge badge--info">FULL</span></td>
+        <td>48</td><td style="color:#059669">40</td><td style="color:#dc2626">8</td>
+        <td><span class="rate-pill rate-pill--yellow">83%</span></td>
+        <td><button class="btn btn--ghost btn--sm" onclick="nav('findings')">View →</button></td>
+      </tr>
+      <tr>
+        <td>26 May 2026 09:15</td>
+        <td><span class="badge badge--grey">CRM</span></td>
+        <td>12</td><td style="color:#059669">10</td><td style="color:#dc2626">2</td>
+        <td><span class="rate-pill rate-pill--yellow">83%</span></td>
+        <td><button class="btn btn--ghost btn--sm" onclick="nav('findings')">View →</button></td>
+      </tr>
+      <tr>
+        <td>24 May 2026 16:48</td>
+        <td><span class="badge badge--info">FULL</span></td>
+        <td>48</td><td style="color:#059669">39</td><td style="color:#dc2626">9</td>
+        <td><span class="rate-pill rate-pill--yellow">82%</span></td>
+        <td><button class="btn btn--ghost btn--sm" onclick="nav('findings')">View →</button></td>
+      </tr>
+      <tr>
+        <td>22 May 2026 11:00</td>
+        <td><span class="badge badge--info">FULL</span></td>
+        <td>48</td><td style="color:#059669">38</td><td style="color:#dc2626">10</td>
+        <td><span class="rate-pill rate-pill--yellow">80%</span></td>
+        <td><button class="btn btn--ghost btn--sm" onclick="nav('findings')">View →</button></td>
+      </tr>
+      <tr>
+        <td>10 May 2026 08:00</td>
+        <td><span class="badge badge--info">FULL</span></td>
+        <td>48</td><td style="color:#dc2626">28</td><td style="color:#dc2626">20</td>
+        <td><span class="rate-pill rate-pill--red">58%</span></td>
+        <td><button class="btn btn--ghost btn--sm" onclick="nav('findings')">View →</button></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 6: SETUP WIZARD
+══════════════════════════════════════════════════ -->
+<div id="screen-setup" class="screen">
+  <div class="wizard-wrap">
+    <!-- Step indicator -->
+    <div class="step-indicator" id="step-indicator">
+      <div class="step-node"><div class="step-circle active" id="sc1">1</div><div class="step-label">Welcome</div></div>
+      <div class="step-line" id="sl1"></div>
+      <div class="step-node"><div class="step-circle" id="sc2">2</div><div class="step-label">Connect</div></div>
+      <div class="step-line" id="sl2"></div>
+      <div class="step-node"><div class="step-circle" id="sc3">3</div><div class="step-label">Verify</div></div>
+      <div class="step-line" id="sl3"></div>
+      <div class="step-node"><div class="step-circle" id="sc4">4</div><div class="step-label">Done</div></div>
+    </div>
+
+    <!-- Step 1: Welcome -->
+    <div id="wizard-step-1" class="wizard-card">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:52px">🛡️</div>
+        <h2 style="font-size:20px;font-weight:700;margin:10px 0 6px">FCI Governance Scanner</h2>
+        <p style="color:var(--muted)">Automated compliance checking for all Zoho modules</p>
+      </div>
+      <ul class="feature-list">
+        <li><span class="feature-check">✓</span> Scans 8 Zoho modules against 50+ FCI governance standards</li>
+        <li><span class="feature-check">✓</span> Identifies naming violations, missing fields, and configuration gaps</li>
+        <li><span class="feature-check">✓</span> Prioritises findings: Critical → High → Medium → Low severity</li>
+        <li><span class="feature-check">✓</span> Tracks remediation progress and compliance trends over time</li>
+        <li><span class="feature-check">✓</span> Sends alerts for critical failures to India Director</li>
+      </ul>
+      <div class="wizard-nav">
+        <div></div>
+        <button class="btn btn--primary" onclick="wizardStep(2)">Get Started →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Connections -->
+    <div id="wizard-step-2" class="wizard-card" hidden>
+      <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">Configure Module Connections</h2>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:18px">Each module needs a Zoho connection configured in Creator Settings → Connections</p>
+      <table class="connection-table">
+        <thead><tr><th>Module</th><th>Connection</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><strong>CRM</strong></td><td style="color:var(--muted);font-size:12px">zoho_crm_connection</td><td><span class="conn-dot conn-dot--green"></span>Connected</td><td><button class="btn btn--ghost btn--sm">Test</button></td></tr>
+          <tr><td><strong>People</strong></td><td style="color:var(--muted);font-size:12px">zoho_people_conn</td><td><span class="conn-dot conn-dot--green"></span>Connected</td><td><button class="btn btn--ghost btn--sm">Test</button></td></tr>
+          <tr><td><strong>Creator</strong></td><td style="color:var(--muted);font-size:12px">zoho_creator_conn</td><td><span class="conn-dot conn-dot--green"></span>Connected</td><td><button class="btn btn--ghost btn--sm">Test</button></td></tr>
+          <tr><td><strong>Analytics</strong></td><td style="color:var(--muted);font-size:12px">zoho_analytics_conn</td><td><span class="conn-dot conn-dot--red"></span>Error</td><td><button class="btn btn--ghost btn--sm">Test</button></td></tr>
+          <tr><td><strong>Sigma</strong></td><td style="color:var(--light);font-size:12px">—</td><td><span class="conn-dot conn-dot--grey"></span>Not configured</td><td><button class="btn btn--secondary btn--sm">Configure</button></td></tr>
+          <tr><td><strong>Recruit</strong></td><td style="color:var(--muted);font-size:12px">zoho_recruit_conn</td><td><span class="conn-dot conn-dot--green"></span>Connected</td><td><button class="btn btn--ghost btn--sm">Test</button></td></tr>
+          <tr><td><strong>Forms</strong></td><td style="color:var(--muted);font-size:12px">zoho_forms_conn</td><td><span class="conn-dot conn-dot--green"></span>Connected</td><td><button class="btn btn--ghost btn--sm">Test</button></td></tr>
+          <tr><td><strong>Catalyst</strong></td><td style="color:var(--muted);font-size:12px">zoho_catalyst_conn</td><td><span class="conn-dot conn-dot--green"></span>Connected</td><td><button class="btn btn--ghost btn--sm">Test</button></td></tr>
+        </tbody>
+      </table>
+      <div class="wizard-nav">
+        <button class="btn btn--ghost" onclick="wizardStep(1)">← Back</button>
+        <button class="btn btn--primary" onclick="wizardStep(3)">Next: Verify →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Verify -->
+    <div id="wizard-step-3" class="wizard-card" hidden>
+      <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">Testing All Connections</h2>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:18px">Running a connection test for each module…</p>
+      <div id="verify-rows"></div>
+      <p style="font-size:12px;color:var(--muted);margin-top:14px" id="verify-summary"></p>
+      <div class="wizard-nav">
+        <button class="btn btn--ghost" onclick="wizardStep(2)">← Back</button>
+        <button class="btn btn--primary" id="btn-verify-next" onclick="wizardStep(4)" disabled>Next: First Scan →</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Done -->
+    <div id="wizard-step-4" class="wizard-card" hidden style="text-align:center">
+      <div style="font-size:52px;margin-bottom:12px">✅</div>
+      <h2 style="font-size:20px;font-weight:700;margin-bottom:8px">Setup Complete!</h2>
+      <p style="color:var(--muted);margin-bottom:24px">6 of 8 modules connected successfully. You can still scan the connected modules.</p>
+
+      <div class="card" style="text-align:left;margin-bottom:20px;background:#f9fafb">
+        <div style="font-weight:600;margin-bottom:6px">📦 Seed Default Rules</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Load 50+ built-in FCI governance rules into the Rules Repository.</p>
+        <div id="seed-result-wizard" hidden style="background:#d1fae5;color:#065f46;padding:8px 12px;border-radius:8px;font-size:13px;margin-bottom:12px">✅ 52 rules seeded successfully!</div>
+        <button class="btn btn--secondary" id="btn-seed-wizard" onclick="seedWizard()">✓ Seed Rules Now</button>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button class="btn btn--primary" onclick="nav('scan')">🔍 Run First Scan</button>
+        <button class="btn btn--ghost" onclick="nav('dashboard')">📊 Go to Dashboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 7: RULES BROWSER
+══════════════════════════════════════════════════ -->
+<div id="screen-rules" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+    <div>
+      <h1 class="page-title">Rules Repository</h1>
+      <p class="page-subtitle">Manage the 50+ scan rules used by the Governance Scanner</p>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn--ghost">↺ Refresh</button>
+      <button class="btn btn--primary">+ Seed Default Rules</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-chip chip--total"><span class="stat-chip__val">52</span><span class="stat-chip__lbl">Total</span></div>
+    <div class="stat-chip chip--enabled"><span class="stat-chip__val">50</span><span class="stat-chip__lbl">Enabled</span></div>
+    <div class="stat-chip chip--crit"><span class="stat-chip__val">8</span><span class="stat-chip__lbl">Critical</span></div>
+    <div class="stat-chip chip--high"><span class="stat-chip__val">15</span><span class="stat-chip__lbl">High</span></div>
+    <div class="stat-chip chip--med"><span class="stat-chip__val">19</span><span class="stat-chip__lbl">Medium</span></div>
+    <div class="stat-chip chip--low"><span class="stat-chip__val">10</span><span class="stat-chip__lbl">Low</span></div>
+  </div>
+
+  <div class="filter-bar">
+    <select class="select"><option>All Modules</option><option>CRM</option><option>People</option><option>Analytics</option></select>
+    <select class="select"><option>All Severities</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select>
+    <select class="select"><option>All Status</option><option>Enabled</option><option>Disabled</option></select>
+    <input type="text" class="search-input" placeholder="Search rule name or ID…" />
+    <span style="font-size:12px;color:var(--muted)">Showing 52 of 52</span>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Rule ID</th><th>Module</th><th>Rule Name</th><th>Check Type</th><th>Severity</th><th>Standard Ref.</th><th style="text-align:center">Enabled</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="rule-id">CRM-001</span></td>
+        <td><span class="badge badge--info">CRM</span></td>
+        <td><strong>Module naming convention</strong><br><small style="color:var(--muted)">Custom modules must use PascalCase</small></td>
+        <td style="font-size:11px;color:var(--muted)">NamingConvention</td>
+        <td><span class="badge badge--high">HIGH</span></td>
+        <td style="font-size:11px;color:var(--primary);font-family:monospace">04_CRM_Standards §1</td>
+        <td style="text-align:center">
+          <label class="toggle"><input type="checkbox" class="toggle__input" checked /><span class="toggle__track"></span></label>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="rule-id">CRM-004</span></td>
+        <td><span class="badge badge--info">CRM</span></td>
+        <td><strong>API field name convention</strong><br><small style="color:var(--muted)">API field names must be UPPER_SNAKE_CASE</small></td>
+        <td style="font-size:11px;color:var(--muted)">FieldNaming</td>
+        <td><span class="badge badge--critical">CRITICAL</span></td>
+        <td style="font-size:11px;color:var(--primary);font-family:monospace">04_CRM_Standards §2</td>
+        <td style="text-align:center">
+          <label class="toggle"><input type="checkbox" class="toggle__input" checked /><span class="toggle__track"></span></label>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="rule-id">ANL-002</span></td>
+        <td><span class="badge" style="background:#d1fae5;color:#065f46">Analytics</span></td>
+        <td><strong>Row-level security on reports</strong><br><small style="color:var(--muted)">All reports must have row-level access configured</small></td>
+        <td style="font-size:11px;color:var(--muted)">SecurityConfig</td>
+        <td><span class="badge badge--critical">CRITICAL</span></td>
+        <td style="font-size:11px;color:var(--primary);font-family:monospace">08_Analytics_Standards §5</td>
+        <td style="text-align:center">
+          <label class="toggle"><input type="checkbox" class="toggle__input" checked /><span class="toggle__track"></span></label>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="rule-id">PEO-003</span></td>
+        <td><span class="badge" style="background:#fce7f3;color:#9d174d">People</span></td>
+        <td><strong>Leave type naming</strong><br><small style="color:var(--muted)">Leave types must use PascalCase names</small></td>
+        <td style="font-size:11px;color:var(--muted)">NamingConvention</td>
+        <td><span class="badge badge--high">HIGH</span></td>
+        <td style="font-size:11px;color:var(--primary);font-family:monospace">05_People_Standards §3</td>
+        <td style="text-align:center">
+          <label class="toggle"><input type="checkbox" class="toggle__input" checked /><span class="toggle__track"></span></label>
+        </td>
+      </tr>
+      <tr style="opacity:0.45">
+        <td><span class="rule-id">SGM-010</span></td>
+        <td><span class="badge" style="background:#fff7ed;color:#9a3412">Sigma</span></td>
+        <td><strong>Widget bundle size check</strong><br><small style="color:var(--muted)">Uncompressed widget JS must be under 500KB</small></td>
+        <td style="font-size:11px;color:var(--muted)">PerformanceCheck</td>
+        <td><span class="badge badge--low">LOW</span></td>
+        <td style="font-size:11px;color:var(--primary);font-family:monospace">03_Sigma_Standards §4</td>
+        <td style="text-align:center">
+          <label class="toggle"><input type="checkbox" class="toggle__input" /><span class="toggle__track"></span></label>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+  </div><!-- end page-content -->
+</div><!-- end main-area -->
+
+<script>
+'use strict';
+
+// ── Navigation ────────────────────────────────────────────────────────
+const SCREEN_LABELS = {
+  dashboard:     'Dashboard',
+  scan:          'Run Scan',
+  findings:      'Findings',
+  findingDetail: 'Finding Detail',
+  history:       'Scan History',
+  setup:         'Setup Wizard',
+  rules:         'Rules Repository'
+};
+
+function nav(screenId) {
+  // Hide all screens
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  // Show target
+  const target = document.getElementById(`screen-${screenId}`);
+  if (target) { target.classList.add('active'); }
+
+  // Update sidebar active
+  document.querySelectorAll('.sidebar-nav li a').forEach(a => {
+    a.classList.remove('active');
+    if (a.id === `nav-${screenId}`) { a.classList.add('active'); }
+  });
+
+  // Update breadcrumb
+  const bc = document.getElementById('breadcrumb');
+  if (bc) {
+    bc.innerHTML = `FCI Governance Scanner › <strong>${SCREEN_LABELS[screenId] || screenId}</strong>`;
+  }
+
+  // Trigger screen-specific init
+  if (screenId === 'scan') { resetScan(); }
+  if (screenId === 'setup') { wizardStep(1, false); }
+
+  return false;
+}
+
+// ── Scan simulation ───────────────────────────────────────────────────
+let scanTimer = null;
+let scanPct   = 0;
+const MODULES = ['CRM', 'People', 'Creator', 'Analytics', 'Sigma', 'Recruit', 'Forms', 'Catalyst'];
+let modIdx = 0;
+
+function startScan() {
+  document.getElementById('scan-idle').hidden    = true;
+  document.getElementById('scan-running').hidden = false;
+  document.getElementById('scan-done').hidden    = true;
+  scanPct = 0; modIdx = 0;
+  setV('lv-pass',0); setV('lv-fail',0); setV('lv-warn',0); setV('lv-crit',0);
+  setProgress(0, 'Initialising…');
+  document.getElementById('scan-eta').textContent = '';
+  runScanTick();
+}
+
+function runScanTick() {
+  clearTimeout(scanTimer);
+  if (scanPct >= 100) {
+    setProgress(100, 'Finalising report…');
+    setTimeout(() => showScanDone(), 600);
+    return;
+  }
+  scanPct = Math.min(100, scanPct + Math.floor(Math.random() * 8) + 3);
+  const modI = Math.min(Math.floor(scanPct / 12.5), MODULES.length - 1);
+  setProgress(scanPct, `Scanning ${MODULES[modI]}… (${scanPct}%)`);
+  const pass = Math.floor(scanPct * 0.4);
+  const fail = Math.floor(scanPct * 0.05);
+  const warn = Math.floor(scanPct * 0.03);
+  const crit = Math.floor(scanPct * 0.02);
+  setV('lv-pass', pass); setV('lv-fail', fail); setV('lv-warn', warn); setV('lv-crit', crit);
+  const remaining = Math.round(((100 - scanPct) / 8) * 0.5);
+  document.getElementById('scan-eta').textContent = remaining > 0 ? `~${remaining}s remaining` : '';
+  scanTimer = setTimeout(runScanTick, 300 + Math.random() * 200);
+}
+
+function setProgress(pct, label) {
+  const bar = document.getElementById('scan-progress-bar');
+  if (bar) bar.style.width = pct + '%';
+  const lbl = document.getElementById('scan-progress-label');
+  if (lbl) lbl.textContent = label;
+}
+
+function showScanDone() {
+  document.getElementById('scan-running').hidden = true;
+  document.getElementById('scan-done').hidden    = false;
+}
+
+function resetScan() {
+  clearTimeout(scanTimer);
+  document.getElementById('scan-idle').hidden    = false;
+  document.getElementById('scan-running').hidden = true;
+  document.getElementById('scan-done').hidden    = true;
+}
+
+function setV(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+// ── Mark resolved ─────────────────────────────────────────────────────
+function markResolved() {
+  const notes = document.getElementById('resolve-notes')?.value?.trim();
+  if (!notes) { alert('Please add remediation notes before marking as resolved.'); return; }
+  document.getElementById('resolve-section').hidden  = true;
+  document.getElementById('resolved-banner').hidden  = false;
+  document.getElementById('resolved-notes-display').textContent = `"${notes}"`;
+}
+function markWontFix() {
+  const notes = document.getElementById('resolve-notes')?.value?.trim() || 'No action — accepted risk';
+  document.getElementById('resolve-section').hidden  = true;
+  document.getElementById('resolved-banner').hidden  = false;
+  document.getElementById('resolved-notes-display').textContent = `Skipped: "${notes}"`;
+}
+
+// ── Setup wizard ──────────────────────────────────────────────────────
+let verifyTimer = null;
+
+function wizardStep(step, runVerify = true) {
+  [1,2,3,4].forEach(i => {
+    document.getElementById(`wizard-step-${i}`).hidden = (i !== step);
+    const sc = document.getElementById(`sc${i}`);
+    if (!sc) return;
+    if (i < step)  { sc.className = 'step-circle done'; sc.textContent = '✓'; }
+    if (i === step){ sc.className = 'step-circle active'; sc.textContent = i; }
+    if (i > step)  { sc.className = 'step-circle'; sc.textContent = i; }
+    const sl = document.getElementById(`sl${i}`);
+    if (sl) sl.className = 'step-line' + (i < step ? ' done' : '');
+  });
+  if (step === 3 && runVerify) { startVerify(); }
+}
+
+const VERIFY_MODULES = ['CRM','People','Creator','Analytics','Sigma','Recruit','Forms','Catalyst'];
+const VERIFY_RESULTS = [true,true,true,false,false,true,true,true]; // Analytics/Sigma fail
+
+function startVerify() {
+  const container = document.getElementById('verify-rows');
+  container.innerHTML = '';
+  document.getElementById('verify-summary').textContent = '';
+  document.getElementById('btn-verify-next').disabled = true;
+
+  VERIFY_MODULES.forEach((mod, i) => {
+    const row = document.createElement('div');
+    row.className = 'verify-row';
+    row.innerHTML = `
+      <span class="verify-mod">${mod}</span>
+      <div class="verify-bar"><div class="verify-fill" id="vf-${i}"></div></div>
+      <span class="verify-status" id="vs-${i}" style="color:var(--muted)">⏳ Waiting…</span>
+    `;
+    container.appendChild(row);
+  });
+
+  let i = 0;
+  function doNext() {
+    if (i >= VERIFY_MODULES.length) {
+      const passed = VERIFY_RESULTS.filter(Boolean).length;
+      document.getElementById('verify-summary').textContent = `${passed} of ${VERIFY_MODULES.length} connections successful.`;
+      document.getElementById('btn-verify-next').disabled = false;
+      return;
+    }
+    const idx = i++;
+    document.getElementById(`vs-${idx}`).textContent = '⏳ Testing…';
+    document.getElementById(`vs-${idx}`).style.color = '#9ca3af';
+    const fill = document.getElementById(`vf-${idx}`);
+    if (fill) {
+      // Animate bar
+      setTimeout(() => { fill.style.width = '100%'; }, 50);
+      setTimeout(() => {
+        const ok = VERIFY_RESULTS[idx];
+        const vs = document.getElementById(`vs-${idx}`);
+        if (vs) {
+          vs.textContent = ok ? '✅ OK' : '❌ Failed';
+          vs.style.color = ok ? '#059669' : '#dc2626';
+          if (!ok) fill.style.background = '#ef4444';
+        }
+        doNext();
+      }, 1400);
+    }
+  }
+  doNext();
+}
+
+function seedWizard() {
+  const btn = document.getElementById('btn-seed-wizard');
+  btn.disabled = true;
+  btn.textContent = '⏳ Seeding…';
+  setTimeout(() => {
+    document.getElementById('seed-result-wizard').hidden = false;
+    btn.textContent = '✓ Done';
+  }, 1800);
+}
+</script>
+</body>
+</html>
