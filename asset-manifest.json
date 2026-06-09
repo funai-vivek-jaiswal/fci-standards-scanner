@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/fci-standards-scanner/FCI_GovernanceScanner/static/css/main.9dc73aa9.css",
+    "main.js": "/fci-standards-scanner/FCI_GovernanceScanner/static/js/main.09429f2c.js",
+    "index.html": "/fci-standards-scanner/FCI_GovernanceScanner/index.html",
+    "main.9dc73aa9.css.map": "/fci-standards-scanner/FCI_GovernanceScanner/static/css/main.9dc73aa9.css.map",
+    "main.09429f2c.js.map": "/fci-standards-scanner/FCI_GovernanceScanner/static/js/main.09429f2c.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.9dc73aa9.css",
+    "static/js/main.09429f2c.js"
+  ]
+}
